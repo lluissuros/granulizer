@@ -206,7 +206,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 ~ampDev = 0.00;
 ~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
 ~grain = { arg envbuf = -1, wavebuf = 0;
-	GrainBufº(4, ~trig.kr, ~graindur.kr, ~wavebuf,
+	GrainBuf.ar(4, ~trig.kr, ~graindur.kr, ~wavebuf,
 	~rate.kr, ~filePos.kr, 2, ~pan , envbuf) * ~ampNoised.kr
 };
 ~grain.play;
