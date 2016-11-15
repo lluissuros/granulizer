@@ -1,6 +1,13 @@
 /*TODO:
 -all samples in b. are mono at the moment
 -funeral is too big
+
+-panning cycle should be proportional to graindur
+-more panning modes besides circle --> i don't need the knob for pan
+-tener reverb, delay, dist
+-nanokontrol to grain density
+-button for changing between mouseX and slider for position
+
 */
 
 
@@ -39,8 +46,8 @@ m.xfadeTime = 40;
 m.stepsPerSec= 20;
 
 m.morph = TaskProxy({
-	var targetBuf= w[\targetBuf].copy;
-	var currentBuf = w[\currentBuf].copy;
+	var targetBuf= m[\targetBuf].copy;
+	var currentBuf = m[\currentBuf].copy;
 	var numSteps = m.xfadeTime * m.stepsPerSec;
 	var bufsToMorph = Array.new(numSteps+1);
 
@@ -62,7 +69,7 @@ m.morph = TaskProxy({
 			(1/m.stepsPerSec).wait;
 		};
 		~wavebuf = targetBuf;
-		w[\currentBuf] = w[\targetBuf].copy;
+		m[\currentBuf] = m[\targetBuf].copy;
 		"MORPH DONE.".postln;
 	};
 }).quant_(0);		// no quantization so the task starts immediately
@@ -267,7 +274,7 @@ m.targetBuf = b.funeral;
 m.targetBuf = b.drumming;
 
 //MORPH SETTINGS
-m.xfadeTime = 10;
+m.xfadeTime = 30;
 m.stepsPerSec = 20;
 m.stepsPerSec = 1; //when low number there is no "leaks"
 //GO!
