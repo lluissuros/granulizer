@@ -1,20 +1,17 @@
 /*TODO:
 -all samples in b. are mono at the moment
 -funeral is too big
-
-+Midi controls for Nano:
-  - ~filePos
-  - ~graindur
-  - ~amp
-  - ~rateRange(adds and rests to rate)
-  - ~GoMorph (button)
-  - x and y panning
 */
+
 
 
 //LOADING AND SETUP
 (
 var soundsRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Sounds/";
+
+s = Server.local;
+s.options.numOutputBusChannels = 4;
+s.boot;
 
 p = ProxySpace.push;
 
@@ -171,6 +168,17 @@ MIDIdef.cc(\buttonPanEqualRandom,
 //~rateRange(adds and rests to rate)
 
 
+//rate range
+MIDIdef.cc(\slider1toRateRange,
+	{
+	arg val;
+	var sliderVal = val.linexp(0,127,0.001,0.5);
+	("rateRange: "+ sliderVal + " %").postln;
+	~rateRange = {sliderVal};
+	},
+1,0);
+
+
 
 )
 
@@ -191,22 +199,23 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 
 /*START TO PLAY*/
 (
+ var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.pater;
 ~trig = { |dens=50| Dust.kr(dens) };
 ~graindur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
 ~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
-/*~rateRange = 0.02;
-~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };*/
-~rate = { LFNoise1.kr.range(0.98, 1.02) };
+~rateRange = 0.02;
+~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };
+//~rate = { LFNoise1.kr.range(0.98, 1.02) };
 ~panCentral = 0;
 ~panDev = {WhiteNoise.kr};
-~panDev = 1;
 ~pan = {~panCentral + ~panDev};
 ~amp = 0.05;
 ~ampDev = 0.00;
 ~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
+
 ~grain = { arg envbuf = -1, wavebuf = 0;
-	GrainBuf.ar(4, ~trig.kr, ~graindur.kr, ~wavebuf,
+	GrainBuf.ar(numOutputs, ~trig.kr, ~graindur.kr, ~wavebuf,
 	~rate.kr, ~filePos.kr, 2, ~pan , envbuf) * ~ampNoised.kr
 };
 ~grain.play;
