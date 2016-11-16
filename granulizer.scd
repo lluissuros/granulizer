@@ -2,7 +2,7 @@
 -all samples in b. are mono at the moment
 -funeral is too big
 
--panning cycle should be proportional to graindur
+DONE --> panning cycle should be proportional to graindur
 -more panning modes besides circle --> i don't need the knob for pan
 -tener reverb, delay, dist
 -nanokontrol to grain density
@@ -13,7 +13,7 @@
 
 -an entryGosh is playing all the time, controlled by a slider?
 
-BUG: why graindur knob makes ugly sound and doesnt find synth// DONE: loading with another ugen, creates a synthdef on the background, wich not always is loaded fast and fails.
+DONE --> BUG: why graindur knob makes ugly sound and doesnt find synth// DONE: loading with another ugen, creates a synthdef on the background, wich not always is loaded fast and fails.
 
 */
 
@@ -60,7 +60,7 @@ m.morph = TaskProxy({
 
 	(numSteps).do { |i|
 		var playTargetBuf;
-	    var targetBufProbability;
+		var targetBufProbability;
 		targetBufProbability = (i + 1) / numSteps;
 		playTargetBuf = targetBufProbability.coin;
 		if (playTargetBuf, {bufsToMorph.add(targetBuf)}, {bufsToMorph.add(currentBuf)});
@@ -93,90 +93,93 @@ MIDIdef.freeAll;
 //NANOKONTROL
 /*
 +Midi controls for Nano:
-  - ~filePos
-  - ~grainDur
-  - ~amp
-  - ~rateRange(adds and rests to rate)
-  - ~GoMorph (button)
-  - x and y panning
+- ~filePos
+- ~grainDur
+- ~amp
+- ~rateRange(adds and rests to rate)
+- ~GoMorph (button)
+- x and y panning
 */
 (
 
 
 MIDIdef.cc(\slider7toAmp,
 	{
-	arg val, num, chan, src;
-	var amp = val.linlin(0,127,0,0.1);
-	("amp: "+amp).postln;
-	~amp = amp;
+		arg val, num, chan, src;
+		var amp = val.linlin(0,127,0,0.1);
+		("amp: "+amp).postln;
+		~amp = amp;
 	}
-,7,0);
+	,7,0);
 
 MIDIdef.cc(\knob7toAmpDev,
 	{
-	arg val, num, chan, src;
-	var ampDev = val.linlin(0,127,0,0.05);
-	("ampDev: "+ampDev).postln;
-	~ampDev = ampDev;
+		arg val, num, chan, src;
+		var ampDev = val.linlin(0,127,0,0.05);
+		("ampDev: "+ampDev).postln;
+		~ampDev = ampDev;
 	},
-23,0);
+	23,0);
 
 MIDIdef.cc(\slider0toFilePos,
 	{
-	arg val;
-	var sliderVal = val.linlin(0,127,0,1);
-	("filePos: "+ sliderVal).postln;
-	~filePos = { sliderVal+ LFNoise0.kr(100, 0.03) };
+		arg val;
+		var sliderVal = val.linlin(0,127,0,1);
+		("filePos: "+ sliderVal).postln;
+		Routine({
+			~filePositionNoised = { sliderVal+ LFNoise0.kr(100, 0.03) };
+			s.sync;
+			~filePos = ~filePositionNoised;
+		}).play;
 	},
-0,0);
+	0,0);
 
-//BUG! maybe
 MIDIdef.cc(\knob0toGraindur,
 	{
-	arg val;
-	var grainDurDev = val.linexp(0,127,0.02,15);
-	("grainDurDev: "+ grainDurDev).postln;
-   ~grainDurDev = grainDurDev;
+		arg val;
+		var grainDurDev = val.linexp(0,127,0.02,15);
+		("grainDurDev: "+ grainDurDev).postln;
+		~grainDurDev = grainDurDev;
 	},
-16,0);
+	16,0);
 
 //pan position
 MIDIdef.cc(\knob6toPanMulti,
 	{
-	arg val;
-	var knobVal = val.linlin(0,127,-2,2);
-	("pan: "+ knobVal).postln;
-   ~panCentral = {knobVal};
+		arg val;
+		var knobVal = val.linlin(0,127,-2,2);
+		("pan: "+ knobVal).postln;
+		~panCentral = {knobVal};
 	},
 	22,0);
 
 //pan randomization
 MIDIdef.cc(\slider6toPanDev,
 	{
-	arg val;
-	var sliderVal = val.linlin(0,127,0,2);
-	("panDev: "+ sliderVal).postln;
-	~panDev =  {WhiteNoise.kr(sliderVal)};
+		arg val;
+		var sliderVal = val.linlin(0,127,0,2);
+		("panDev: "+ sliderVal).postln;
+		~panDev =  {WhiteNoise.kr(sliderVal)};
 	},
-6,0);
+	6,0);
 
 //pan mode 1: circle
 MIDIdef.cc(\buttonPanCircle,
 	{
-	("circle pan Mode").postln;
-	~panCentral = {LFSaw.kr(4/~grainDur)};
-	~panDev = 0;
+		("circle pan Mode").postln;
+		~panCentral = {LFSaw.kr(4/~grainDur)};
+		~panDev = 0;
 	},
-38,0);
+	38,0);
 
 //pan mode 2: equal random
 MIDIdef.cc(\buttonPanEqualRandom,
 	{
-	("equal random Mode").postln;
-	~panCentral = {0};
-	~panDev = {WhiteNoise.kr()}	;
+		("equal random Mode").postln;
+		~panCentral = {0};
+		~panDev = {WhiteNoise.kr()}	;
 	},
-54,0);
+	54,0);
 
 //~rateRange(adds and rests to rate)
 
@@ -184,12 +187,12 @@ MIDIdef.cc(\buttonPanEqualRandom,
 //rate range
 MIDIdef.cc(\slider1toRateRange,
 	{
-	arg val;
-	var sliderVal = val.linexp(0,127,0.001,0.5);
-	("rateRange: "+ sliderVal + " %").postln;
-	~rateRange = {sliderVal};
+		arg val;
+		var sliderVal = val.linexp(0,127,0.001,0.5);
+		("rateRange: "+ sliderVal + " %").postln;
+		~rateRange = {sliderVal};
 	},
-1,0);
+	1,0);
 
 
 
@@ -203,7 +206,7 @@ MIDIdef.cc(\slider1toRateRange,
 PanAz
 pos = pan position. Channels are evenly spaced over a cyclic period of 2.0 in pos with 0.0 equal to channel zero and 2.0/numChans equal to channel 1, 4.0/numChans equal to channel 2, etc.
 Thus all channels will be cyclically panned through if a sawtooth wave from -1 to +1 is used to modulate the pos.
- ==> basically, 0 is front, then 0.5 right, 1and -1 rear, -0.5 left
+==> basically, 0 is front, then 0.5 right, 1and -1 rear, -0.5 left
 ==> tmabe pots rotar desde 0 a 2 per fer una volta completa, nice!!
 
 */
@@ -211,7 +214,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 
 /*START TO PLAY*/
 (
- var numOutputs = s.options.numOutputBusChannels;
+var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.pater;
 ~trig = { |dens=50| Dust.kr(dens) };
 //~grainDur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
@@ -231,7 +234,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 
 ~grain = { arg envbuf = -1, wavebuf = 0;
 	GrainBuf.ar(numOutputs, ~trig.kr, ~grainDur.kr, ~wavebuf,
-	~rate.kr, ~filePos.kr, 2, ~pan , envbuf) * ~ampNoised.kr
+		~rate.kr, ~filePos.kr, 2, ~pan , envbuf) * ~ampNoised.kr
 };
 ~grain.play;
 )
