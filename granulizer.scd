@@ -8,6 +8,13 @@
 -nanokontrol to grain density
 -button for changing between mouseX and slider for position
 
+-arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
+-control to set the steps and duration of morph
+
+-an entryGosh is playing all the time, controlled by a slider?
+
+BUG: why graindur knob makes ugly sound and doesnt find synth
+
 */
 
 
