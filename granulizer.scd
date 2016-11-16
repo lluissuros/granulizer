@@ -13,7 +13,7 @@
 
 -an entryGosh is playing all the time, controlled by a slider?
 
-BUG: why graindur knob makes ugly sound and doesnt find synth
+BUG: why graindur knob makes ugly sound and doesnt find synth// DONE: loading with another ugen, creates a synthdef on the background, wich not always is loaded fast and fails.
 
 */
 
@@ -164,7 +164,7 @@ MIDIdef.cc(\slider6toPanDev,
 MIDIdef.cc(\buttonPanCircle,
 	{
 	("circle pan Mode").postln;
-	~panCentral = {LFSaw.kr(1)};
+	~panCentral = {LFSaw.kr(4/~grainDur)};
 	~panDev = 0;
 	},
 38,0);
@@ -207,7 +207,6 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 ==> tmabe pots rotar desde 0 a 2 per fer una volta completa, nice!!
 
 */
-
 
 
 /*START TO PLAY*/
