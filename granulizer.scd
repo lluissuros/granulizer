@@ -94,7 +94,7 @@ MIDIdef.freeAll;
 /*
 +Midi controls for Nano:
   - ~filePos
-  - ~graindur
+  - ~grainDur
   - ~amp
   - ~rateRange(adds and rests to rate)
   - ~GoMorph (button)
@@ -134,10 +134,9 @@ MIDIdef.cc(\slider0toFilePos,
 MIDIdef.cc(\knob0toGraindur,
 	{
 	arg val;
-	var knobVal = val.linexp(0,127,0.02,15);
-	var grainDurDev = knobVal;
-	("grainDur: "+ knobVal + " ,grainDurDev: "+grainDurDev).postln;
-   ~graindur = {knobVal + LFNoise0.kr(100,grainDurDev)};
+	var grainDurDev = val.linexp(0,127,0.02,15);
+	("grainDurDev: "+ grainDurDev).postln;
+   ~grainDurDev = grainDurDev;
 	},
 16,0);
 
@@ -166,7 +165,7 @@ MIDIdef.cc(\buttonPanCircle,
 	{
 	("circle pan Mode").postln;
 	~panCentral = {LFSaw.kr(1)};
-	~panDev = {0};
+	~panDev = 0;
 	},
 38,0);
 
@@ -216,7 +215,10 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
  var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.pater;
 ~trig = { |dens=50| Dust.kr(dens) };
-~graindur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
+//~grainDur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
+~grainDurDev = 0.5;
+~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev)};
+
 ~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
 ~rateRange = 0.02;
 ~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };
@@ -229,7 +231,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 ~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
 
 ~grain = { arg envbuf = -1, wavebuf = 0;
-	GrainBuf.ar(numOutputs, ~trig.kr, ~graindur.kr, ~wavebuf,
+	GrainBuf.ar(numOutputs, ~trig.kr, ~grainDur.kr, ~wavebuf,
 	~rate.kr, ~filePos.kr, 2, ~pan , envbuf) * ~ampNoised.kr
 };
 ~grain.play;
@@ -244,10 +246,10 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 ~rate = { LFNoise1.kr.range(0.5, 1.5) };
 ~rate = { LFNoise1.kr.range(0.98, 1.02) };
 ~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
-~graindur = 0.05;
-~graindur = 0.5;
-~graindur = 2;
-~graindur = 10;
+~grainDur = 0.05;
+~grainDur = 0.5;
+~grainDur = 2;
+~grainDur = 10;
 
 ~panCentral = {LFSaw.ar(1)}; //in multichannel, this makes a circle
 ~panCentral = {LFSaw.ar(1) + ~panDev}
@@ -257,8 +259,8 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 ~amp =0.0;
 ~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
 ~ampNoised = ~amp;
-~graindur = {MouseY.kr(0.5,25) + LFNoise0.kr(100,3)};
-~graindur = {SinOsc.ar(0.05).range(0.05,10)};
+~grainDur = {MouseY.kr(0.5,25) + LFNoise0.kr(100,3)};
+~grainDur = {SinOsc.ar(0.05).range(0.05,10)};
 ~trig = { |dens=50| Dust.kr(dens) };
 
 
