@@ -126,11 +126,7 @@ MIDIdef.cc(\slider0toFilePos,
 		arg val;
 		var sliderVal = val.linlin(0,127,0,1);
 		("filePos: "+ sliderVal).postln;
-		Routine({
-			~filePositionNoised = { sliderVal+ LFNoise0.kr(100, 0.03) };
-			s.sync;
-			~filePos = ~filePositionNoised;
-		}).play;
+		~filePos = sliderVal;
 	},
 	0,0);
 
@@ -221,7 +217,9 @@ var numOutputs = s.options.numOutputBusChannels;
 ~grainDurDev = 0.5;
 ~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev)};
 
-~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
+~filePos = {MouseX.kr};
+~filePosNoised = {~filePos + LFNoise0.kr(100, 0.03)};
+
 ~rateRange = 0.02;
 ~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };
 //~rate = { LFNoise1.kr.range(0.98, 1.02) };
@@ -234,7 +232,7 @@ var numOutputs = s.options.numOutputBusChannels;
 
 ~grain = { arg envbuf = -1, wavebuf = 0;
 	GrainBuf.ar(numOutputs, ~trig.kr, ~grainDur.kr, ~wavebuf,
-		~rate.kr, ~filePos.kr, 2, ~pan , envbuf) * ~ampNoised.kr
+		~rate.kr, ~filePosNoised.kr, 2, ~pan , envbuf) * ~ampNoised.kr
 };
 ~grain.play;
 )
