@@ -3,13 +3,14 @@
 -funeral is too big
 
 DONE --> panning cycle should be proportional to graindur
+DONE --> nanokontrol to grain density
+DONE -->button for changing between mouseX and slider for position
 -more panning modes besides circle --> i don't need the knob for pan
 -tener reverb, delay, dist
-DONE --> nanokontrol to grain density
--button for changing between mouseX and slider for position
+-b.soundsArray at setup, because if I do array on the fly the order changes all the time
 
--arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
--control to set the steps and duration of morph
+DONE --> arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
+DONE -->control to set the steps and duration of morph
 
 -an entryGosh is playing all the time, controlled by a slider?
 
@@ -141,6 +142,14 @@ MIDIdef.cc(\knob0toGraindur,
 	},
 	16,0);
 
+MIDIdef.cc(\buttonEnableMouseXPositionAndMouseYGrainDur,
+	{
+		("position by MouseX and GrainDur mouseY, touch controls to recover midi").postln;
+		~filePos = {MouseX.kr};
+		~grainDurDev = {MouseY.kr(0.05,15)};
+	},
+	32,0);
+
 
 MIDIdef.cc(\knob6toAmpDevChangeRate,
 	{  |val|
@@ -221,7 +230,7 @@ MIDIdef.cc(\buttonPreviousBuffer,
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
 			var key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
-			m.targetBuf = b[key];
+			m.targetBuf = b.sounds[key];
 			("targetBuf: " + key).postln;
 			b.soundsIndex = b.soundsIndex-1;
 		})
@@ -233,7 +242,7 @@ MIDIdef.cc(\buttonNextBuffer,
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
 			var key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
-			m.targetBuf = b[key];
+			m.targetBuf = b.sounds[key];
 			("targetBuf: " + key).postln;
 			b.soundsIndex = b.soundsIndex+1;
 		})
@@ -273,12 +282,12 @@ m.start = b.sounds.pater;
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
 
-//~grainDur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
+//~grainDurDev = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
 ~grainDurDev = 0.5;
-~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev)};
+~grainDur = {Lag.kr(~grainDurDev, 0.2) + LFNoise0.kr(100,~grainDurDev)};
 
 ~filePos = {MouseX.kr};
-~filePosNoised = {~filePos + LFNoise0.kr(100, 0.03)};
+~filePosNoised = {Lag.kr(~filePos, 0.2) + LFNoise0.kr(100, 0.03)};
 
 ~rateRange = 0.02;
 ~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };
@@ -337,7 +346,6 @@ m.stepsPerSec = 20;
 m.stepsPerSec = 1; //when low number there is no "leaks"
 //GO!
 m.morph.stop.play;
-
 
 
 
