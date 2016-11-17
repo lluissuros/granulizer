@@ -150,7 +150,7 @@ MIDIdef.cc(\slider0toFilePos,
 MIDIdef.cc(\knob0toGraindur,
 	{
 		arg val;
-		var grainDurDev = val.linexp(0,127,0.02,15);
+		var grainDurDev = val.linexp(0,127,0.1,30);
 		("grainDurDev: "+ grainDurDev).postln;
 		~grainDurDev = grainDurDev;
 	},
