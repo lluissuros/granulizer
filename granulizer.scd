@@ -28,21 +28,25 @@ s.boot;
 p = ProxySpace.push;
 
 b = b ? (); //buffers object
+b.keyIndex = 0;
+b.discardButton = true; //workaround because button is called two times
+b.sounds = ();
+
 //GrainBuf needs a mono source bufnum
-b.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
-b.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "arpegio1_impro.aiff" ,channels:[0]).bufnum;
-b.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "arpegio1_19_07.aiff", channels:[0]).bufnum;
-b.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
-b.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
-b.gosh = Buffer.readChannel(s, soundsRelativePath ++ "jamiexx - Gosh.wav", channels:[0]).bufnum;
-b.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
-b.fratres= Buffer.readChannel(s,soundsRelativePath ++ "Arvo Part - Fratres For Cello And Piano.wav", channels:[0]).bufnum;
-b.fostercare= Buffer.readChannel(s,soundsRelativePath ++ "Burial - Fostercare (HQ).wav", channels:[0]).bufnum;
-b.miserere= Buffer.readChannel(s,soundsRelativePath ++ "Gregorio Allegri- Miserere.wav", channels:[0]).bufnum;
-b.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake - Klavierwerke.wav", channels:[0]).bufnum;
-b.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
+b.sounds.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
+b.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "arpegio1_impro.aiff" ,channels:[0]).bufnum;
+b.sounds.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "arpegio1_19_07.aiff", channels:[0]).bufnum;
+b.sounds.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
+b.sounds.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
+b.sounds.gosh = Buffer.readChannel(s, soundsRelativePath ++ "jamiexx - Gosh.wav", channels:[0]).bufnum;
+b.sounds.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
+b.sounds.fratres= Buffer.readChannel(s,soundsRelativePath ++ "Arvo Part - Fratres For Cello And Piano.wav", channels:[0]).bufnum;
+b.sounds.fostercare= Buffer.readChannel(s,soundsRelativePath ++ "Burial - Fostercare (HQ).wav", channels:[0]).bufnum;
+b.sounds.miserere= Buffer.readChannel(s,soundsRelativePath ++ "Gregorio Allegri- Miserere.wav", channels:[0]).bufnum;
+b.sounds.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake - Klavierwerke.wav", channels:[0]).bufnum;
+b.sounds.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
 //TODO: Toooo big!
-b.funeral= Buffer.readChannel(s, soundsRelativePath ++ "John Tavener - Funeral Canticle (1-2).wav", channels:[0]).bufnum;
+b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "John Tavener - Funeral Canticle (1-2).wav", channels:[0]).bufnum;
 
 
 
@@ -175,7 +179,6 @@ MIDIdef.cc(\buttonPanEqualRandom,
 	},
 	54,0);
 
-//rate range
 MIDIdef.cc(\slider1toRateRange,
 	{
 		arg val;
@@ -185,7 +188,7 @@ MIDIdef.cc(\slider1toRateRange,
 	},
 	1,0);
 
-//rate range
+
 MIDIdef.cc(\knob1toTriggerDensity,
 	{
 		arg val;
@@ -195,8 +198,61 @@ MIDIdef.cc(\knob1toTriggerDensity,
 	},
 	17,0);
 
-)
 
+MIDIdef.cc(\knob2toMorphStepsPerSec,
+	{
+		arg val;
+		m.stepsPerSec  = val.linlin(0,127,1,60);
+		("stepsPerSec: "+ m.stepsPerSec).postln;
+	},
+	18,0);
+
+MIDIdef.cc(\slider2toMorphCrossFadeTime,
+	{
+		arg val;
+		m.xfadeTime  = val.linlin(0,127,1,60);
+		("crossFade time: "+ m.xfadeTime).postln;
+	},
+	2,0);
+
+
+
+MIDIdef.cc(\buttonPreviousBuffer,
+	{
+		b.discardButton= b.discardButton.not;
+		if(b.discardButton,{},{
+			var key = b.sounds.keys.asArray.wrapAt(b.index);
+			m.targetBuf = b[key];
+			("targetBuf: " + key).postln;
+			b.index = b.index-1;
+		})
+	},
+	43,0);
+
+MIDIdef.cc(\buttonNextBuffer,
+	{
+		b.discardButton= b.discardButton.not;
+		if(b.discardButton,{},{
+			var key = b.sounds.keys.asArray.wrapAt(b.index);
+			m.targetBuf = b[key];
+			("targetBuf: " + key).postln;
+			b.index = b.index+1;
+		})
+	},
+	44,0);
+
+MIDIdef.cc(\buttonToGo,
+	{
+		b.discardButton= b.discardButton.not;
+		if(b.discardButton,{},{
+			m.morph.stop.play;
+			("MORPH! ").postln;
+		})
+	},
+	41,0);
+
+
+)
 
 
 /*
@@ -212,7 +268,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 /*START TO PLAY*/
 (
 var numOutputs = s.options.numOutputBusChannels;
-~wavebuf = b.pater;
+~wavebuf = b.sounds.pater;
 
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
@@ -258,21 +314,21 @@ var numOutputs = s.options.numOutputBusChannels;
 
 
 /*MORPH TO OTHER SOUNDS*/
-m.start = b.pater;
+m.start = b.sounds.pater;
 
-m.targetBuf = b.pater;
-m.targetBuf = b.arp1Filter;
-m.targetBuf = b.arp1;
-m.targetBuf = b.glacat;
-m.targetBuf = b.noPuedeSer;
-m.targetBuf = b.gosh;
-m.targetBuf = b.entryGosh;
-m.targetBuf = b.fratres;
-m.targetBuf = b.fostercare;
-m.targetBuf = b.miserere;
-m.targetBuf = b.klavierwerke;
-m.targetBuf = b.funeral;
-m.targetBuf = b.drumming;
+m.targetBuf = b.sounds.pater;
+m.targetBuf = b.sounds.arp1Filter;
+m.targetBuf = b.sounds.arp1;
+m.targetBuf = b.sounds.glacat;
+m.targetBuf = b.sounds.noPuedeSer;
+m.targetBuf = b.sounds.gosh;
+m.targetBuf = b.sounds.entryGosh;
+m.targetBuf = b.sounds.fratres;
+m.targetBuf = b.sounds.fostercare;
+m.targetBuf = b.sounds.miserere;
+m.targetBuf = b.sounds.klavierwerke;
+m.targetBuf = b.sounds.funeral;
+m.targetBuf = b.sounds.drumming;
 
 //MORPH SETTINGS
 m.xfadeTime = 30;
