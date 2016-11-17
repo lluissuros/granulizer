@@ -13,8 +13,6 @@ DONE --> panning cycle should be proportional to graindur
 
 -an entryGosh is playing all the time, controlled by a slider?
 
-DONE --> BUG: why graindur knob makes ugly sound and doesnt find synth// DONE: loading with another ugen, creates a synthdef on the background, wich not always is loaded fast and fails.
-
 */
 
 
@@ -153,9 +151,9 @@ MIDIdef.cc(\knob6toPanMulti,
 MIDIdef.cc(\slider6toPanDev,
 	{
 		arg val;
-		var sliderVal = val.linlin(0,127,0,2);
+		var sliderVal = val.linlin(0,127,0,1.5);
 		("panDev: "+ sliderVal).postln;
-		~panDev =  {WhiteNoise.kr(sliderVal)};
+		~panDev =  sliderVal;
 	},
 	6,0);
 
@@ -172,12 +170,10 @@ MIDIdef.cc(\buttonPanCircle,
 MIDIdef.cc(\buttonPanEqualRandom,
 	{
 		("equal random Mode").postln;
-		~panCentral = {0};
-		~panDev = {WhiteNoise.kr()}	;
+		~panCentral = 0;
+		~panDev = 1;
 	},
 	54,0);
-
-//~rateRange(adds and rests to rate)
 
 
 //rate range
@@ -189,12 +185,7 @@ MIDIdef.cc(\slider1toRateRange,
 		~rateRange = {sliderVal};
 	},
 	1,0);
-
-
-
 )
-
-
 
 
 
@@ -213,6 +204,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.pater;
 ~trig = { |dens=50| Dust.kr(dens) };
+
 //~grainDur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
 ~grainDurDev = 0.5;
 ~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev)};
@@ -222,10 +214,11 @@ var numOutputs = s.options.numOutputBusChannels;
 
 ~rateRange = 0.02;
 ~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };
-//~rate = { LFNoise1.kr.range(0.98, 1.02) };
+
 ~panCentral = 0;
-~panDev = {WhiteNoise.kr};
-~pan = {~panCentral + ~panDev};
+~panDev = 1;
+~pan = {~panCentral + {WhiteNoise.kr(mul: ~panDev)}};
+
 ~amp = 0.05;
 ~ampDev = 0.00;
 ~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
