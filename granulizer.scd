@@ -12,11 +12,25 @@ DONE -->button for changing between mouseX and slider for position
 DONE --> arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
 DONE -->control to set the steps and duration of morph
 
--an entryGosh is playing all the time, controlled by a slider?
+TODO: -an entryGosh is playing all the time, controlled by a slider?
+
+
+BUG: --> el navegador de sounds no va bé
+Bug: MouseY ml ajustat
+BUG: circle pan broken
+
+TODO: -grainDur ha de tenir el centre sobre el 2
+TODO: - arp1 i arp1filter esta massa fort i entry gosh fluix MOLT IMPORTANT ELS VOLUMS, per no causar estrés a l'oient. Si hi ha osties de volumn no es podran relaxar
+TODO: més sons: molaria més sons de baix rollo entryGosh, tambe altres peces atmosferiques rollo que_portes
+TODO amb la rme posar compressors a la sortida.
 
 */
 
-
+(
+s = Server.local;
+s.options.numOutputBusChannels = 4;
+s.boot;
+)
 
 //LOADING AND SETUP
 (
@@ -52,8 +66,8 @@ b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "John Tavener - Fu
 
 
 m = m ? ();//morpher object
-m.xfadeTime = 40;
-m.stepsPerSec= 20;
+m.xfadeTime = 20;
+m.stepsPerSec= 10;
 
 m.morph = TaskProxy({
 	var targetBuf= m[\targetBuf].copy;
@@ -153,7 +167,7 @@ MIDIdef.cc(\buttonEnableMouseXPositionAndMouseYGrainDur,
 
 MIDIdef.cc(\knob6toAmpDevChangeRate,
 	{  |val|
-		var knobVal = val.linlin(0,127,0,30);
+		var knobVal = val.linlin(0,127,5,30);
 		("amp dev change rate: "+ knobVal).postln;
 		~ampDevChangeRate = knobVal;
 	},
@@ -276,8 +290,8 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 /*START TO PLAY*/
 (
 var numOutputs = s.options.numOutputBusChannels;
-~wavebuf = b.sounds.pater;
-m.start = b.sounds.pater;
+~wavebuf = b.sounds.entryGosh;
+m.start = b.sounds.entryGosh;
 
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
