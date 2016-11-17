@@ -28,7 +28,7 @@ s.boot;
 p = ProxySpace.push;
 
 b = b ? (); //buffers object
-b.keyIndex = 0;
+b.soundsIndex = 0;
 b.discardButton = true; //workaround because button is called two times
 b.sounds = ();
 
@@ -141,17 +141,16 @@ MIDIdef.cc(\knob0toGraindur,
 	},
 	16,0);
 
-//pan position
-MIDIdef.cc(\knob6toPanMulti,
-	{
-		arg val;
-		var knobVal = val.linlin(0,127,-2,2);
-		("pan: "+ knobVal).postln;
-		~panCentral = knobVal;
+
+MIDIdef.cc(\knob6toAmpDevChangeRate,
+	{  |val|
+		var knobVal = val.linlin(0,127,0,30);
+		("amp dev change rate: "+ knobVal).postln;
+		~ampDevChangeRate = knobVal;
 	},
 	22,0);
 
-//pan randomization
+
 MIDIdef.cc(\slider6toPanDev,
 	{
 		arg val;
@@ -161,7 +160,7 @@ MIDIdef.cc(\slider6toPanDev,
 	},
 	6,0);
 
-//pan mode 1: circle
+
 MIDIdef.cc(\buttonPanCircle,
 	{
 		("circle pan Mode").postln;
@@ -170,7 +169,7 @@ MIDIdef.cc(\buttonPanCircle,
 	},
 	38,0);
 
-//pan mode 2: equal random
+
 MIDIdef.cc(\buttonPanEqualRandom,
 	{
 		("equal random Mode").postln;
@@ -221,10 +220,10 @@ MIDIdef.cc(\buttonPreviousBuffer,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
-			var key = b.sounds.keys.asArray.wrapAt(b.index);
+			var key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
 			m.targetBuf = b[key];
 			("targetBuf: " + key).postln;
-			b.index = b.index-1;
+			b.soundsIndex = b.soundsIndex-1;
 		})
 	},
 	43,0);
@@ -233,10 +232,10 @@ MIDIdef.cc(\buttonNextBuffer,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
-			var key = b.sounds.keys.asArray.wrapAt(b.index);
+			var key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
 			m.targetBuf = b[key];
 			("targetBuf: " + key).postln;
-			b.index = b.index+1;
+			b.soundsIndex = b.soundsIndex+1;
 		})
 	},
 	44,0);
@@ -269,6 +268,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 (
 var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.sounds.pater;
+m.start = b.sounds.pater;
 
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
@@ -289,7 +289,8 @@ var numOutputs = s.options.numOutputBusChannels;
 
 ~amp = 0.05;
 ~ampDev = 0.00;
-~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
+~ampDevChangeRate = 10;
+~ampNoised ={LFNoise0.kr(~ampDevChangeRate).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
 
 ~grain = { arg envbuf = -1, wavebuf = 0;
 	GrainBuf.ar(numOutputs, ~trig.kr, ~grainDur.kr, ~wavebuf,
