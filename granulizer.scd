@@ -5,7 +5,7 @@
 DONE --> panning cycle should be proportional to graindur
 -more panning modes besides circle --> i don't need the knob for pan
 -tener reverb, delay, dist
--nanokontrol to grain density
+DONE --> nanokontrol to grain density
 -button for changing between mouseX and slider for position
 
 -arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
@@ -143,7 +143,7 @@ MIDIdef.cc(\knob6toPanMulti,
 		arg val;
 		var knobVal = val.linlin(0,127,-2,2);
 		("pan: "+ knobVal).postln;
-		~panCentral = {knobVal};
+		~panCentral = knobVal;
 	},
 	22,0);
 
@@ -175,16 +175,26 @@ MIDIdef.cc(\buttonPanEqualRandom,
 	},
 	54,0);
 
-
 //rate range
 MIDIdef.cc(\slider1toRateRange,
 	{
 		arg val;
 		var sliderVal = val.linexp(0,127,0.001,0.5);
 		("rateRange: "+ sliderVal + " %").postln;
-		~rateRange = {sliderVal};
+		~rateRange = sliderVal;
 	},
 	1,0);
+
+//rate range
+MIDIdef.cc(\knob1toTriggerDensity,
+	{
+		arg val;
+		var sliderVal = val.linexp(0,127,2,200);
+		("grainDensity: "+ sliderVal).postln;
+		~triggerDensity = sliderVal;
+	},
+	17,0);
+
 )
 
 
@@ -203,7 +213,9 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 (
 var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.pater;
-~trig = { |dens=50| Dust.kr(dens) };
+
+~triggerDensity = 50;
+~trig = { Dust.kr(~triggerDensity)};
 
 //~grainDur = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
 ~grainDurDev = 0.5;
@@ -239,19 +251,6 @@ var numOutputs = s.options.numOutputBusChannels;
 ~rate = { LFNoise1.kr.range(0.5, 1.5) };
 ~rate = { LFNoise1.kr.range(0.98, 1.02) };
 ~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
-~grainDur = 0.05;
-~grainDur = 0.5;
-~grainDur = 2;
-~grainDur = 10;
-
-~panCentral = {LFSaw.ar(1)}; //in multichannel, this makes a circle
-~panCentral = {LFSaw.ar(1) + ~panDev}
-
-~amp =0.05;
-~amp ={LFNoise0.kr(10).range(0.02,0.1)};
-~amp =0.0;
-~ampNoised ={LFNoise0.kr(10).range( ~amp - ~ampDev,  ~amp + ~ampDev)};
-~ampNoised = ~amp;
 ~grainDur = {MouseY.kr(0.5,25) + LFNoise0.kr(100,3)};
 ~grainDur = {SinOsc.ar(0.05).range(0.05,10)};
 ~trig = { |dens=50| Dust.kr(dens) };
