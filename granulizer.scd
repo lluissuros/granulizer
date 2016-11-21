@@ -49,19 +49,26 @@ b.sounds = ();
 
 //GrainBuf needs a mono source bufnum
 b.sounds.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
-b.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "arpegio1_impro.aiff" ,channels:[0]).bufnum;
-b.sounds.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "arpegio1_19_07.aiff", channels:[0]).bufnum;
+b.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_filtered_lowered.wav" ,channels:[0]).bufnum;
+b.sounds.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_19_07_lowered.wav", channels:[0]).bufnum;
+b.sounds.allegro1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - allegro1_8_11_2013.wav", channels:[0]).bufnum;
+b.sounds.ensQuedem = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - ens quedem 7_07.wav", channels:[0]).bufnum;
+b.sounds.feedbackChords = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - feedbackchords.wav", channels:[0]).bufnum;
+b.sounds.quePortes = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - que portes 22_11_2015 90bpm.wav", channels:[0]).bufnum;
 b.sounds.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
 b.sounds.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
 b.sounds.gosh = Buffer.readChannel(s, soundsRelativePath ++ "jamiexx - Gosh.wav", channels:[0]).bufnum;
 b.sounds.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
+b.sounds.entryGoshClick = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_click.wav", channels:[0]).bufnum;
+b.sounds.entryGoshWahWah = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_wahwah.wav", channels:[0]).bufnum;
+b.sounds.fratresIntro= Buffer.readChannel(s,soundsRelativePath ++ "fratres intro.wav", channels:[0]).bufnum;
 b.sounds.fratres= Buffer.readChannel(s,soundsRelativePath ++ "Arvo Part - Fratres For Cello And Piano.wav", channels:[0]).bufnum;
 b.sounds.fostercare= Buffer.readChannel(s,soundsRelativePath ++ "Burial - Fostercare (HQ).wav", channels:[0]).bufnum;
 b.sounds.miserere= Buffer.readChannel(s,soundsRelativePath ++ "Gregorio Allegri- Miserere.wav", channels:[0]).bufnum;
 b.sounds.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake - Klavierwerke.wav", channels:[0]).bufnum;
 b.sounds.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
-//TODO: Toooo big!
-b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "John Tavener - Funeral Canticle (1-2).wav", channels:[0]).bufnum;
+b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "funeral_canticle_chopped.wav", channels:[0]).bufnum;
+b.sounds.funeralShort= Buffer.readChannel(s, soundsRelativePath ++ "funeral_chopped_short.wav", channels:[0]).bufnum;
 
 
 
@@ -343,15 +350,23 @@ m.start = b.sounds.pater;
 m.targetBuf = b.sounds.pater;
 m.targetBuf = b.sounds.arp1Filter;
 m.targetBuf = b.sounds.arp1;
+m.targetBuf = b.sounds.allegro1;
+m.targetBuf = b.sounds.ensQuedem;
+m.targetBuf = b.sounds.quePortes;
+m.targetBuf = b.sounds.feedbackChords;
 m.targetBuf = b.sounds.glacat;
 m.targetBuf = b.sounds.noPuedeSer;
 m.targetBuf = b.sounds.gosh;
 m.targetBuf = b.sounds.entryGosh;
+m.targetBuf = b.sounds.entryGoshClick;
+m.targetBuf = b.sounds.entryGoshWahWah;
+m.targetBuf = b.sounds.fratresIntro;
 m.targetBuf = b.sounds.fratres;
 m.targetBuf = b.sounds.fostercare;
 m.targetBuf = b.sounds.miserere;
 m.targetBuf = b.sounds.klavierwerke;
 m.targetBuf = b.sounds.funeral;
+m.targetBuf = b.sounds.funeralShort;
 m.targetBuf = b.sounds.drumming;
 
 //MORPH SETTINGS
