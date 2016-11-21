@@ -83,7 +83,7 @@ m.morph = TaskProxy({
 		if (playTargetBuf, {bufsToMorph.add(targetBuf)}, {bufsToMorph.add(currentBuf)});
 	};
 
-	//bufsToMorph.do{|item, i | [i," ",item].postln};
+	bufsToMorph.do{|item, i | [i," ",item].postln};
 
 	if (m.targetBuf.notNil) {
 		bufsToMorph.do { |item, i|
@@ -160,7 +160,7 @@ MIDIdef.cc(\buttonEnableMouseXPositionAndMouseYGrainDur,
 	{
 		("position by MouseX and GrainDur mouseY, touch controls to recover midi").postln;
 		~filePos = {MouseX.kr};
-		~grainDurDev = {MouseY.kr(0.05,15)};
+		~grainDurDev = {MouseY.kr(0.05,10).poll};
 	},
 	32,0);
 
@@ -297,11 +297,11 @@ m.start = b.sounds.entryGosh;
 ~trig = { Dust.kr(~triggerDensity)};
 
 //~grainDurDev = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
-~grainDurDev = 0.5;
-~grainDur = {Lag.kr(~grainDurDev, 0.2) + LFNoise0.kr(100,~grainDurDev)};
+~grainDurDev = {MouseY.kr(0.05,10).poll};
+~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev.min(3))};
 
 ~filePos = {MouseX.kr};
-~filePosNoised = {Lag.kr(~filePos, 0.2) + LFNoise0.kr(100, 0.03)};
+~filePosNoised = {~filePos + LFNoise0.kr(100, 0.03)};
 
 ~rateRange = 0.02;
 ~rate = { LFNoise1.kr.range((1- ~rateRange), (1+~rateRange)) };
