@@ -36,10 +36,6 @@ s.boot;
 (
 var soundsRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Sounds/";
 
-s = Server.local;
-s.options.numOutputBusChannels = 4;
-s.boot;
-
 p = ProxySpace.push;
 
 b = b ? (); //buffers object
@@ -69,6 +65,9 @@ b.sounds.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake 
 b.sounds.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
 b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "funeral_canticle_chopped.wav", channels:[0]).bufnum;
 b.sounds.funeralShort= Buffer.readChannel(s, soundsRelativePath ++ "funeral_chopped_short.wav", channels:[0]).bufnum;
+b.sounds.spotlight1= Buffer.readChannel(s, soundsRelativePath ++ "spotlight1.wav", channels:[0]).bufnum;
+b.sounds.spotlight2= Buffer.readChannel(s, soundsRelativePath ++ "spotlight2.wav", channels:[0]).bufnum;
+b.sounds.spotlight3= Buffer.readChannel(s, soundsRelativePath ++ "spotlight3.wav", channels:[0]).bufnum;
 
 
 
@@ -77,31 +76,33 @@ m.xfadeTime = 20;
 m.stepsPerSec= 10;
 
 m.morph = TaskProxy({
-	var targetBuf= m[\targetBuf].copy;
-	var currentBuf = m[\currentBuf].copy;
+/*	var targetBuf= m[\targetBuf].copy;
+	var currentBuf = m[\currentBuf].copy;*/
 	var numSteps = m.xfadeTime * m.stepsPerSec;
-	var bufsToMorph = Array.new(numSteps+1);
+	var soundsToMorph = Array.new(numSteps+1);
 
 	(numSteps).do { |i|
-		var playTargetBuf;
-		var targetBufProbability;
-		targetBufProbability = (i + 1) / numSteps;
-		playTargetBuf = targetBufProbability.coin;
-		if (playTargetBuf, {bufsToMorph.add(targetBuf)}, {bufsToMorph.add(currentBuf)});
+		var playTargetSound;
+		var targetSoundProbability;
+		targetSoundProbability = (i + 1) / numSteps;
+		playTargetSound = targetSoundProbability.coin;
+		if (playTargetSound, {soundsToMorph.add(m.targetSound.copy)}, {soundsToMorph.add(m.currentSound.copy)});
 	};
 
-	bufsToMorph.do{|item, i | [i," ",item].postln};
+	soundsToMorph.do{|item, i | [i," ",item].postln};
 
-	if (m.targetBuf.notNil) {
-		bufsToMorph.do { |item, i|
+	if (m.targetSound.notNil) {
+		soundsToMorph.do { |item, i|
 			var percent = i*100/numSteps;
-			["numSteps %", percent, " bufnum", bufsToMorph.at(i)].postln;
-			~wavebuf = bufsToMorph.at(i);
+			var sound = soundsToMorph.at(i);
+			var buf = b.sounds[sound];
+			["numSteps %", percent, " sound:", sound, " buf: "+ buf].postln;
+			~wavebuf = buf;
 			(1/m.stepsPerSec).wait;
 		};
-		~wavebuf = targetBuf;
-		m[\currentBuf] = m[\targetBuf].copy;
-		"MORPH DONE.".postln;
+		~wavebuf = b.sounds[m.targetSound];
+		m.currentSound = m.targetSound.copy;
+		["MORPH DONE. curent : " + m.currentSound].postln;
 	};
 }).quant_(0);		// no quantization so the task starts immediately
 
@@ -109,8 +110,6 @@ m.morph = TaskProxy({
 MIDIClient.init;
 MIDIIn.connectAll;
 MIDIdef.freeAll;
-
-
 )
 
 
@@ -298,7 +297,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 (
 var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = b.sounds.entryGosh;
-m.start = b.sounds.entryGosh;
+m.currentSound = \entryGosh;
 
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
@@ -345,29 +344,32 @@ m.start = b.sounds.entryGosh;
 
 
 /*MORPH TO OTHER SOUNDS*/
-m.start = b.sounds.pater;
+m.currentSound = \pater;
 
-m.targetBuf = b.sounds.pater;
-m.targetBuf = b.sounds.arp1Filter;
-m.targetBuf = b.sounds.arp1;
-m.targetBuf = b.sounds.allegro1;
-m.targetBuf = b.sounds.ensQuedem;
-m.targetBuf = b.sounds.quePortes;
-m.targetBuf = b.sounds.feedbackChords;
-m.targetBuf = b.sounds.glacat;
-m.targetBuf = b.sounds.noPuedeSer;
-m.targetBuf = b.sounds.gosh;
-m.targetBuf = b.sounds.entryGosh;
-m.targetBuf = b.sounds.entryGoshClick;
-m.targetBuf = b.sounds.entryGoshWahWah;
-m.targetBuf = b.sounds.fratresIntro;
-m.targetBuf = b.sounds.fratres;
-m.targetBuf = b.sounds.fostercare;
-m.targetBuf = b.sounds.miserere;
-m.targetBuf = b.sounds.klavierwerke;
-m.targetBuf = b.sounds.funeral;
-m.targetBuf = b.sounds.funeralShort;
-m.targetBuf = b.sounds.drumming;
+m.targetSound = \pater;
+m.targetSound = \arp1Filter;
+m.targetSound = \arp1;
+m.targetSound = \allegro1;
+m.targetSound = \ensQuedem;
+m.targetSound = \quePortes;
+m.targetSound = \feedbackChords;
+m.targetSound = \glacat;
+m.targetSound = \noPuedeSer;
+m.targetSound = \gosh;
+m.targetSound = \entryGosh;
+m.targetSound = \entryGoshClick;
+m.targetSound = \entryGoshWahWah;
+m.targetSound = \fratresIntro;
+m.targetSound = \fratres;
+m.targetSound = \fostercare;
+m.targetSound = \miserere;
+m.targetSound = \klavierwerke;
+m.targetSound = \funeral;
+m.targetSound = \funeralShort;
+m.targetSound = \drumming;
+m.targetSound = \spotlight1;
+m.targetSound = \spotlight2;
+m.targetSound = \spotlight3;
 
 //MORPH SETTINGS
 m.xfadeTime = 30;
