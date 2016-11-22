@@ -1,34 +1,42 @@
-/*TODO:
--all samples in b. are mono at the moment
--funeral is too big
-
+/*DONES:
+DONE --> -all samples in b. are mono at the moment
+DONE --> -funeral is too big
 DONE --> panning cycle should be proportional to graindur
 DONE --> nanokontrol to grain density
 DONE -->button for changing between mouseX and slider for position
+DONE --> arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
+DONE -->control to set the steps and duration of morph
+TODO: -an entryGosh is playing all the time, controlled by a slider?
+BUG: --> el navegador de sounds no va bé
+BUG: circle pan broken
+OK --> Bug: MouseY ml ajustat
+TODO: -grainDur ha de tenir el centre sobre el 2
+DONE--> TODO: - arp1 i arp1filter esta massa fort i entry gosh fluix MOLT IMPORTANT ELS VOLUMS, per no causar estrés a l'oient. Si hi ha osties de volumn no es podran relaxar
+DONE -->TODO: més sons: molaria més sons de baix rollo entryGosh, tambe altres peces atmosferiques rollo que_portes
+DONE --> TODO amb la rme posar compressors a la sortida.
+DONE --> Borrar slider i knob 0
+
+
+TODOS:
+-No es guai lo del morph. Fa falta altra sistema, potser botó per cambiar ~wavebuf a current i target i fer-ho manual, amb acces rapid a entryGosh.
 -more panning modes besides circle --> i don't need the knob for pan
 -tener reverb, delay, dist
 -b.soundsArray at setup, because if I do array on the fly the order changes all the time
-
-DONE --> arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
-DONE -->control to set the steps and duration of morph
-
-TODO: -an entryGosh is playing all the time, controlled by a slider?
-
-
+-an entryGosh is playing all the time, controlled by a slider? or a button firing a bass?
+BUG: navegador y morph.play button broken
 BUG: --> el navegador de sounds no va bé
-Bug: MouseY ml ajustat
 BUG: circle pan broken
 
-TODO: -grainDur ha de tenir el centre sobre el 2
-TODO: - arp1 i arp1filter esta massa fort i entry gosh fluix MOLT IMPORTANT ELS VOLUMS, per no causar estrés a l'oient. Si hi ha osties de volumn no es podran relaxar
-TODO: més sons: molaria més sons de baix rollo entryGosh, tambe altres peces atmosferiques rollo que_portes
-TODO amb la rme posar compressors a la sortida.
 
 */
 
 (
 s = Server.local;
 s.options.numOutputBusChannels = 4;
+o = Server.internal.options;
+o.memSize = 2 ** 19;
+p = ProxySpace.push(s);
+p.fadeTime = 5;
 s.boot;
 )
 
@@ -36,13 +44,10 @@ s.boot;
 (
 var soundsRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Sounds/";
 
-p = ProxySpace.push;
-
 b = b ? (); //buffers object
 b.soundsIndex = 0;
 b.discardButton = true; //workaround because button is called two times
 b.sounds = ();
-
 //GrainBuf needs a mono source bufnum
 b.sounds.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
 b.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_filtered_lowered.wav" ,channels:[0]).bufnum;
@@ -53,7 +58,6 @@ b.sounds.feedbackChords = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - 
 b.sounds.quePortes = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - que portes 22_11_2015 90bpm.wav", channels:[0]).bufnum;
 b.sounds.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
 b.sounds.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
-b.sounds.gosh = Buffer.readChannel(s, soundsRelativePath ++ "jamiexx - Gosh.wav", channels:[0]).bufnum;
 b.sounds.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
 b.sounds.entryGoshClick = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_click.wav", channels:[0]).bufnum;
 b.sounds.entryGoshWahWah = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_wahwah.wav", channels:[0]).bufnum;
@@ -144,7 +148,7 @@ MIDIdef.cc(\knob7toAmpDev,
 	},
 	23,0);
 
-MIDIdef.cc(\slider0toFilePos,
+/*MIDIdef.cc(\slider0toFilePos,
 	{
 		arg val;
 		var sliderVal = val.linlin(0,127,0,1);
@@ -160,15 +164,15 @@ MIDIdef.cc(\knob0toGraindur,
 		("grainDurDev: "+ grainDurDev).postln;
 		~grainDurDev = grainDurDev;
 	},
-	16,0);
+	16,0);*/
 
-MIDIdef.cc(\buttonEnableMouseXPositionAndMouseYGrainDur,
+/*MIDIdef.cc(\buttonEnableMouseXPositionAndMouseYGrainDur,
 	{
 		("position by MouseX and GrainDur mouseY, touch controls to recover midi").postln;
 		~filePos = {MouseX.kr};
 		~grainDurDev = {MouseY.kr(0.05,10).poll};
 	},
-	32,0);
+	32,0);*/
 
 
 MIDIdef.cc(\knob6toAmpDevChangeRate,
@@ -193,7 +197,7 @@ MIDIdef.cc(\slider6toPanDev,
 MIDIdef.cc(\buttonPanCircle,
 	{
 		("circle pan Mode").postln;
-		~panCentral = {LFSaw.kr(4/~grainDur)};
+		~panCentral = {LFSaw.kr(10)};
 		~panDev = 0;
 	},
 	38,0);
@@ -249,10 +253,11 @@ MIDIdef.cc(\buttonPreviousBuffer,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
-			var key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
-			m.targetBuf = b.sounds[key];
-			("targetBuf: " + key).postln;
+			var key;
 			b.soundsIndex = b.soundsIndex-1;
+			key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
+			m.targetSound = key.asSymbol;
+			("targetSound: " + key).postln;
 		})
 	},
 	43,0);
@@ -261,10 +266,11 @@ MIDIdef.cc(\buttonNextBuffer,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
-			var key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
-			m.targetBuf = b.sounds[key];
-			("targetBuf: " + key).postln;
+			var key;
 			b.soundsIndex = b.soundsIndex+1;
+			key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
+			m.targetSound = key.asSymbol;
+			("targetSound: " + key).postln;
 		})
 	},
 	44,0);
@@ -303,7 +309,7 @@ m.currentSound = \entryGosh;
 ~trig = { Dust.kr(~triggerDensity)};
 
 //~grainDurDev = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
-~grainDurDev = {MouseY.kr(0.05,10).poll};
+~grainDurDev = {MouseY.kr(0.05,10).poll(2)};
 ~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev.min(3))};
 
 ~filePos = {MouseX.kr};
@@ -355,7 +361,6 @@ m.targetSound = \quePortes;
 m.targetSound = \feedbackChords;
 m.targetSound = \glacat;
 m.targetSound = \noPuedeSer;
-m.targetSound = \gosh;
 m.targetSound = \entryGosh;
 m.targetSound = \entryGoshClick;
 m.targetSound = \entryGoshWahWah;
@@ -372,8 +377,8 @@ m.targetSound = \spotlight2;
 m.targetSound = \spotlight3;
 
 //MORPH SETTINGS
-m.xfadeTime = 30;
-m.stepsPerSec = 20;
+m.xfadeTime = 1;
+m.stepsPerSec = 5;
 m.stepsPerSec = 1; //when low number there is no "leaks"
 //GO!
 m.morph.stop.play;
