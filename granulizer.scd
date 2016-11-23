@@ -15,17 +15,19 @@ DONE--> TODO: - arp1 i arp1filter esta massa fort i entry gosh fluix MOLT IMPORT
 DONE -->TODO: més sons: molaria més sons de baix rollo entryGosh, tambe altres peces atmosferiques rollo que_portes
 DONE --> TODO amb la rme posar compressors a la sortida.
 DONE --> Borrar slider i knob 0
+SOLVED --> b.soundsArray at setup, because if I do array on the fly the order changes all the time
+SOLVED -->an entryGosh is playing all the time, controlled by a slider? or a button firing a bass?
+SOLVED : navegador y morph.play button broken
+SOLVED : --> el navegador de sounds no va bé
+SOLVED: circle pan broken
+DONE --> No es guai lo del morph. Fa falta altra sistema, potser botó per cambiar ~wavebuf a current i target i fer-ho manual, amb acces rapid a entryGosh.
 
 
 TODOS:
--No es guai lo del morph. Fa falta altra sistema, potser botó per cambiar ~wavebuf a current i target i fer-ho manual, amb acces rapid a entryGosh.
 -more panning modes besides circle --> i don't need the knob for pan
--tener reverb, delay, dist
--b.soundsArray at setup, because if I do array on the fly the order changes all the time
--an entryGosh is playing all the time, controlled by a slider? or a button firing a bass?
-BUG: navegador y morph.play button broken
-BUG: --> el navegador de sounds no va bé
-BUG: circle pan broken
+-tener reverb, delay, dist PEDALS?
+-mes truquis 4-chan
+-passar arp1 filtered a 4-chan per poderho tocar
 
 
 */
@@ -36,7 +38,6 @@ s.options.numOutputBusChannels = 4;
 o = Server.internal.options;
 o.memSize = 2 ** 19;
 p = ProxySpace.push(s);
-p.fadeTime = 5;
 s.boot;
 )
 
@@ -249,7 +250,7 @@ MIDIdef.cc(\slider2toMorphCrossFadeTime,
 
 
 
-MIDIdef.cc(\buttonPreviousBuffer,
+MIDIdef.cc(\buttonPreviousNavigation,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
@@ -260,9 +261,9 @@ MIDIdef.cc(\buttonPreviousBuffer,
 			("targetSound: " + key).postln;
 		})
 	},
-	43,0);
+	61,0);
 
-MIDIdef.cc(\buttonNextBuffer,
+MIDIdef.cc(\buttonNextNavigation,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
@@ -273,9 +274,51 @@ MIDIdef.cc(\buttonNextBuffer,
 			("targetSound: " + key).postln;
 		})
 	},
+	62,0);
+
+
+MIDIdef.cc(\buttonPreviousPlay,
+	{
+		b.discardButton= b.discardButton.not;
+		//spaguetti!
+		if(b.discardButton,{},{
+			if( m.previousSound !== m.currentSound,{
+				m.targetSound = m.currentSound.copy.asSymbol;
+				m.currentSound = m.previousSound.copy.asSymbol;
+				~wavebuf = b.sounds[m.currentSound];
+				("playing " + m.currentSound).postln;
+			},{})
+		})
+	},
+	43,0);
+
+MIDIdef.cc(\buttonNextPlay,
+	{
+		b.discardButton= b.discardButton.not;
+		//spaguetti!
+		if(b.discardButton,{},{
+			if( m.targetSound !== m.currentSound,{
+				m.previousSound = m.currentSound.copy.asSymbol;
+				m.currentSound = m.targetSound.copy.asSymbol;
+				~wavebuf = b.sounds[m.currentSound];
+				("playing " + m.currentSound).postln;
+			},{})
+		})
+	},
 	44,0);
 
-MIDIdef.cc(\buttonToGo,
+MIDIdef.cc(\buttonEntryGosh,
+	{
+		b.discardButton= b.discardButton.not;
+		if(b.discardButton,{},{
+				~wavebuf = b.sounds.entryGosh;
+				"entryGosh".postln;
+		})
+	},
+	42,0);
+
+
+MIDIdef.cc(\buttonToGoMorph,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
