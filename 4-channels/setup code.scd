@@ -28,7 +28,7 @@ s.boot;
 (
 p = Pbind(
      \degree, Pseq([0 ,3, 5, 6, 7],inf),
-	\out, Pseq([0,1,2,3],4),
+	\out, Pseq([0,1,2,3],40),
      \dur, 0.1,
      \instrument, \nicepoc
 ).play;
