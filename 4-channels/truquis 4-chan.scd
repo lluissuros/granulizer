@@ -1,8 +1,12 @@
 (
-SynthDef( \nicepoc, { |out=0,freq=440,amp=0.1,dur=0.3|
+SynthDef( \nicepoc, { |out=0,freq=440,amp=0.0125,dur=0.3|
 		Out.ar( out, SinOsc.ar( freq, mul: amp )*EnvGen.kr( Env.perc(0.05,1), timeScale: dur, doneAction:2))
 }).add;
 )
+
+
+
+
 
 (
 p = Pbind(

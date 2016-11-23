@@ -38,8 +38,13 @@ s.options.numOutputBusChannels = 4;
 o = Server.internal.options;
 o.memSize = 2 ** 19;
 p = ProxySpace.push(s);
+p.fadeTime = 0;
 s.boot;
 )
+
+s.recChannels_(4); // or whatever number of channels
+s.record;
+s.stopRecording;
 
 //LOADING AND SETUP
 (
