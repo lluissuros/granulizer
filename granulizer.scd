@@ -21,13 +21,13 @@ SOLVED : navegador y morph.play button broken
 SOLVED : --> el navegador de sounds no va bé
 SOLVED: circle pan broken
 DONE --> No es guai lo del morph. Fa falta altra sistema, potser botó per cambiar ~wavebuf a current i target i fer-ho manual, amb acces rapid a entryGosh.
-
+DONE -->BUG: buttons pre i next no van bé (previousSound) ==> en comptes de autoplay, fer que setegi el target a previous o next
+DONE -->entry gosh button ha de fer morph
+DONE -->tener reverb, delay, dist PEDALS?
 
 TODOS:
-BUG: buttons pre i next no van bé (previousSound) ==> en comptes de autoplay, fer que setegi el target a previous o next
--entry gosh button ha de fer morph
+SAM: passar codi arp1 simplificat
 -more panning modes besides circle --> i don't need the knob for pan
--tener reverb, delay, dist PEDALS?
 -mes truquis 4-chan
 -passar arp1 filtered a 4-chan per poderho tocar
 
@@ -93,8 +93,6 @@ m.xfadeTime = 20;
 m.stepsPerSec= 10;
 
 m.morph = TaskProxy({
-/*	var targetBuf= m[\targetBuf].copy;
-	var currentBuf = m[\currentBuf].copy;*/
 	var numSteps = m.xfadeTime * m.stepsPerSec;
 	var soundsToMorph = Array.new(numSteps+1);
 
@@ -118,6 +116,7 @@ m.morph = TaskProxy({
 			(1/m.stepsPerSec).wait;
 		};
 		~wavebuf = b.sounds[m.targetSound];
+		m.previousSound = m.currentSound.copy;
 		m.currentSound = m.targetSound.copy;
 		["MORPH DONE. curent : " + m.currentSound].postln;
 	};
@@ -132,15 +131,6 @@ MIDIdef.freeAll;
 
 
 //NANOKONTROL
-/*
-+Midi controls for Nano:
-- ~filePos
-- ~grainDur
-- ~amp
-- ~rateRange(adds and rests to rate)
-- ~GoMorph (button)
-- x and y panning
-*/
 (
 MIDIdef.cc(\slider7toAmp,
 	{
@@ -266,8 +256,6 @@ MIDIdef.cc(\slider2toMorphCrossFadeTime,
 	},
 	2,0);
 
-
-
 MIDIdef.cc(\buttonPreviousNavigation,
 	{
 		b.discardButton= b.discardButton.not;
@@ -295,42 +283,26 @@ MIDIdef.cc(\buttonNextNavigation,
 	62,0);
 
 
-MIDIdef.cc(\buttonPreviousPlay,
+MIDIdef.cc(\buttonPreviousToTarget,
 	{
 		b.discardButton= b.discardButton.not;
-		//spaguetti!
 		if(b.discardButton,{},{
-			if( m.previousSound !== m.currentSound,{
-				m.targetSound = m.currentSound.copy.asSymbol;
-				m.currentSound = m.previousSound.copy.asSymbol;
-				~wavebuf = b.sounds[m.currentSound];
-				("playing " + m.currentSound).postln;
-			},{})
+			m.targetSound = m.previousSound.copy;
+			("targetSound: " + m.targetSound).postln;
 		})
 	},
 	43,0);
-
-MIDIdef.cc(\buttonNextPlay,
-	{
-		b.discardButton= b.discardButton.not;
-		//spaguetti!
-		if(b.discardButton,{},{
-			if( m.targetSound !== m.currentSound,{
-				m.previousSound = m.currentSound.copy.asSymbol;
-				m.currentSound = m.targetSound.copy.asSymbol;
-				~wavebuf = b.sounds[m.currentSound];
-				("playing " + m.currentSound).postln;
-			},{})
-		})
-	},
-	44,0);
 
 MIDIdef.cc(\buttonEntryGosh,
 	{
 		b.discardButton= b.discardButton.not;
 		if(b.discardButton,{},{
-				~wavebuf = b.sounds.entryGosh;
-				"entryGosh".postln;
+			var auxFadeTime = m.xfadeTime.copy;
+			m.targetSound = \entryGosh;
+			m.xfadeTime = 3;
+			m.morph.stop.play;
+			"entryGosh".postln;
+			m.xfadeTime = auxFadeTime;
 		})
 	},
 	42,0);
