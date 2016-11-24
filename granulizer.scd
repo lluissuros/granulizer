@@ -24,6 +24,8 @@ DONE --> No es guai lo del morph. Fa falta altra sistema, potser botó per cambi
 
 
 TODOS:
+BUG: buttons pre i next no van bé (previousSound) ==> en comptes de autoplay, fer que setegi el target a previous o next
+-entry gosh button ha de fer morph
 -more panning modes besides circle --> i don't need the knob for pan
 -tener reverb, delay, dist PEDALS?
 -mes truquis 4-chan
@@ -49,11 +51,13 @@ s.stopRecording;
 //LOADING AND SETUP
 (
 var soundsRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Sounds/";
+var samplesRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Samples/";
 
 b = b ? (); //buffers object
 b.soundsIndex = 0;
 b.discardButton = true; //workaround because button is called two times
 b.sounds = ();
+b.samples =();
 //GrainBuf needs a mono source bufnum
 b.sounds.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
 b.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_filtered_lowered.wav" ,channels:[0]).bufnum;
@@ -61,7 +65,7 @@ b.sounds.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_1
 b.sounds.allegro1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - allegro1_8_11_2013.wav", channels:[0]).bufnum;
 b.sounds.ensQuedem = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - ens quedem 7_07.wav", channels:[0]).bufnum;
 b.sounds.feedbackChords = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - feedbackchords.wav", channels:[0]).bufnum;
-b.sounds.quePortes = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - que portes 22_11_2015 90bpm.wav", channels:[0]).bufnum;
+b.sounds.quePortes = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - que portes 22_11_2015_SHORT.wav", channels:[0]).bufnum;
 b.sounds.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
 b.sounds.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
 b.sounds.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
@@ -79,7 +83,10 @@ b.sounds.spotlight1= Buffer.readChannel(s, soundsRelativePath ++ "spotlight1.wav
 b.sounds.spotlight2= Buffer.readChannel(s, soundsRelativePath ++ "spotlight2.wav", channels:[0]).bufnum;
 b.sounds.spotlight3= Buffer.readChannel(s, soundsRelativePath ++ "spotlight3.wav", channels:[0]).bufnum;
 
-
+//samples to trig
+b.samples.getsIntoCar =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - gets into car.wav").bufnum;
+b.samples.everyOneHAsAJob =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - everyone has a job.wav").bufnum;
+b.samples.actualizedFully =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - have you actualized fully.wav").bufnum;
 
 m = m ? ();//morpher object
 m.xfadeTime = 20;
@@ -123,6 +130,7 @@ MIDIdef.freeAll;
 )
 
 
+
 //NANOKONTROL
 /*
 +Midi controls for Nano:
@@ -134,8 +142,6 @@ MIDIdef.freeAll;
 - x and y panning
 */
 (
-
-
 MIDIdef.cc(\slider7toAmp,
 	{
 		arg val, num, chan, src;
@@ -154,31 +160,38 @@ MIDIdef.cc(\knob7toAmpDev,
 	},
 	23,0);
 
-/*MIDIdef.cc(\slider0toFilePos,
+MIDIdef.cc(\slider0toSampleAmp,
 	{
 		arg val;
 		var sliderVal = val.linlin(0,127,0,1);
-		("filePos: "+ sliderVal).postln;
-		~filePos = sliderVal;
+		("sampleAmp: "+ sliderVal).postln;
+		~sampleAmp = sliderVal;
 	},
 	0,0);
 
-MIDIdef.cc(\knob0toGraindur,
+MIDIdef.cc(\buttonPlayGetsIntoCar,
 	{
-		arg val;
-		var grainDurDev = val.linexp(0,127,0.1,30);
-		("grainDurDev: "+ grainDurDev).postln;
-		~grainDurDev = grainDurDev;
+		var bufnum = b.samples.getsIntoCar;
+		("gets into car").postln;
+		~sample = {Pan4.ar(PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), loop: 0)) * ~sampleAmp};
 	},
-	16,0);*/
+	32,0);
 
-/*MIDIdef.cc(\buttonEnableMouseXPositionAndMouseYGrainDur,
+MIDIdef.cc(\buttonPlayEveryoneHasAJob,
 	{
-		("position by MouseX and GrainDur mouseY, touch controls to recover midi").postln;
-		~filePos = {MouseX.kr};
-		~grainDurDev = {MouseY.kr(0.05,10).poll};
+		var bufnum = b.samples.everyOneHAsAJob;
+		("everyOneHAsAJob").postln;
+		~sample = {Pan4.ar(PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), loop: 0)) * ~sampleAmp};
 	},
-	32,0);*/
+	48,0);
+
+MIDIdef.cc(\buttonPlayActuallizedFully,
+	{
+		var bufnum = b.samples.actualizedFully;
+		("actualizedFully").postln;
+		~sample = {Pan4.ar(PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), loop: 0)) * ~sampleAmp};
+	},
+	64,0);
 
 
 MIDIdef.cc(\knob6toAmpDevChangeRate,
@@ -332,8 +345,6 @@ MIDIdef.cc(\buttonToGoMorph,
 		})
 	},
 	41,0);
-
-
 )
 
 
@@ -380,6 +391,7 @@ m.currentSound = \entryGosh;
 		~rate.kr, ~filePosNoised.kr, 2, ~pan , envbuf) * ~ampNoised.kr
 };
 ~grain.play;
+~sample.play;
 )
 
 /*STOP*/
