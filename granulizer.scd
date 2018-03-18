@@ -1,29 +1,9 @@
 /*DONES:
-DONE --> -all samples in b. are mono at the moment
-DONE --> -funeral is too big
-DONE --> panning cycle should be proportional to graindur
-DONE --> nanokontrol to grain density
-DONE -->button for changing between mouseX and slider for position
-DONE --> arrows to switch between sounds, and button to morph.play (or the arrow changes and plays?)
-DONE -->control to set the steps and duration of morph
-TODO: -an entryGosh is playing all the time, controlled by a slider?
 BUG: --> el navegador de sounds no va bé
 BUG: circle pan broken
 OK --> Bug: MouseY ml ajustat
 TODO: -grainDur ha de tenir el centre sobre el 2
-DONE--> TODO: - arp1 i arp1filter esta massa fort i entry gosh fluix MOLT IMPORTANT ELS VOLUMS, per no causar estrés a l'oient. Si hi ha osties de volumn no es podran relaxar
-DONE -->TODO: més sons: molaria més sons de baix rollo entryGosh, tambe altres peces atmosferiques rollo que_portes
-DONE --> TODO amb la rme posar compressors a la sortida.
-DONE --> Borrar slider i knob 0
-SOLVED --> b.soundsArray at setup, because if I do array on the fly the order changes all the time
-SOLVED -->an entryGosh is playing all the time, controlled by a slider? or a button firing a bass?
-SOLVED : navegador y morph.play button broken
-SOLVED : --> el navegador de sounds no va bé
-SOLVED: circle pan broken
-DONE --> No es guai lo del morph. Fa falta altra sistema, potser botó per cambiar ~wavebuf a current i target i fer-ho manual, amb acces rapid a entryGosh.
-DONE -->BUG: buttons pre i next no van bé (previousSound) ==> en comptes de autoplay, fer que setegi el target a previous o next
-DONE -->entry gosh button ha de fer morph
-DONE -->tener reverb, delay, dist PEDALS?
+
 
 TODOS:
 SAM: passar codi arp1 simplificat
@@ -36,7 +16,8 @@ SAM: passar codi arp1 simplificat
 
 (
 s = Server.local;
-s.options.numOutputBusChannels = 4;
+//s.options.numOutputBusChannels = 4;
+s.options.numOutputBusChannels = 2;
 o = Server.internal.options;
 o.memSize = 2 ** 19;
 p = ProxySpace.push(s);
