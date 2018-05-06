@@ -136,7 +136,7 @@ m.morphMultiple = TaskProxy({
 			~pan = soundProb -1 * panDirection * panDirectionByIndex;
 			~wavebuf = b.sounds[soundToPlay];
 
-			[index, soundProb, soundToPlay, (soundProb -1 * panDirection * panDirectionByIndex)].postln;
+			//[index, soundProb, soundToPlay, (soundProb -1 * panDirection * panDirectionByIndex)].postln;
 		};
 	(m.cycle/m.probabilityShape.size).wait;
 	};
@@ -495,7 +495,9 @@ s.stopRecording;
 m.cycle = 5;
 ~grain.play;
 ~sample.play;
-m.morphMultiple.play
+m.morphMultiple.play;
+m.morphMultiple.stop;
+~grain.stop;
 m.currentSounds = List[\entryGoshClick, \noise, \silence]
 
 m.currentSounds.add(\fratres);
