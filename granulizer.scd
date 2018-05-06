@@ -60,6 +60,8 @@ b.sounds.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake 
 b.sounds.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
 b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "funeral_canticle_chopped.wav", channels:[0]).bufnum;
 b.sounds.funeralShort= Buffer.readChannel(s, soundsRelativePath ++ "funeral_chopped_short.wav", channels:[0]).bufnum;
+b.sounds.silence= Buffer.readChannel(s, soundsRelativePath ++ "silence.aif", channels:[0]).bufnum;
+b.sounds.noise= Buffer.readChannel(s, soundsRelativePath ++ "noiseSnr.aif", channels:[0]).bufnum;
 b.sounds.spotlight1= Buffer.readChannel(s, soundsRelativePath ++ "spotlight1.wav", channels:[0]).bufnum;
 b.sounds.spotlight2= Buffer.readChannel(s, soundsRelativePath ++ "spotlight2.wav", channels:[0]).bufnum;
 b.sounds.spotlight3= Buffer.readChannel(s, soundsRelativePath ++ "spotlight3.wav", channels:[0]).bufnum;
@@ -69,9 +71,15 @@ b.samples.getsIntoCar =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - get
 b.samples.everyOneHAsAJob =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - everyone has a job.wav").bufnum;
 b.samples.actualizedFully =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - have you actualized fully.wav").bufnum;
 
+//initialization:
 m = m ? ();//morpher object
 m.xfadeTime = 20;
 m.stepsPerSec= 10;
+m.cycle = 10;
+m.probabilityShape =  Wavetable.sineFill(512, 1.0/[1]).asArray[0..512]; //only take the postive part of sine
+m.probabilityShape =  Env.new([0.001, 0.001, 1, 1, 0.001], [0.25, 0.25, 0.25, 0.25], '\sin' ).asSignal.asArray;
+m.probabilityShape.plot;
+m.currentSounds = m.currentSounds ? List.new(0);
 
 m.morph = TaskProxy({
 	var numSteps = m.xfadeTime * m.stepsPerSec;
@@ -92,7 +100,7 @@ m.morph = TaskProxy({
 			var percent = i*100/numSteps;
 			var sound = soundsToMorph.at(i);
 			var buf = b.sounds[sound];
-			["numSteps %", percent, " sound:", sound, " buf: "+ buf].postln;
+		//	["numSteps %", percent, " sound:", sound, " buf: "+ buf].postln;
 			~wavebuf = buf;
 			(1/m.stepsPerSec).wait;
 		};
@@ -102,6 +110,37 @@ m.morph = TaskProxy({
 		["MORPH DONE. curent : " + m.currentSound].postln;
 	};
 }).quant_(0);		// no quantization so the task starts immediately
+
+
+
+m.morphMultiple = TaskProxy({
+	var panDirection = 1;
+
+	inf.do { |el, index|
+		if (m.currentSounds.size > 0) {
+			var phase = (m.probabilityShape.size/m.currentSounds.size).floor;
+			var probs = m.currentSounds.collect({ |el, i|
+				m.probabilityShape.wrapAt(i*phase + index).abs;
+			});
+			var soundToPlay =  m.currentSounds.wchoose(probs.normalizeSum);
+
+			var indexOfSound =  m.currentSounds.indexOf(soundToPlay);
+			var soundProb = probs.at(indexOfSound);
+			var panDirectionByIndex = if(indexOfSound.odd, 1, -1);
+
+			if ( index %  m.probabilityShape.size == 0){
+				"CHANGE PAN DIRECTION".postln;
+				panDirection = panDirection * -1;
+			};
+
+			~pan = soundProb -1 * panDirection * panDirectionByIndex;
+			~wavebuf = b.sounds[soundToPlay];
+
+			[index, soundProb, soundToPlay, (soundProb -1 * panDirection * panDirectionByIndex)].postln;
+		};
+	(m.cycle/m.probabilityShape.size).wait;
+	};
+}).quant_(0);
 
 
 MIDIClient.init;
@@ -321,7 +360,8 @@ m.currentSound = \entryGosh;
 ~trig = { Dust.kr(~triggerDensity)};
 
 //~grainDurDev = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
-~grainDurDev = {MouseY.kr(0.05,10).poll(2)};
+
+~grainDurDev = { MouseY.kr(0.05,10) };
 ~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev.min(3))};
 
 ~filePos = {MouseX.kr};
@@ -391,6 +431,7 @@ m.targetSound = \spotlight3;
 
 //MORPH SETTINGS
 m.xfadeTime = 1;
+m.xfadeTime = 20;
 m.stepsPerSec = 5;
 m.stepsPerSec = 1; //when low number there is no "leaks"
 //GO!
@@ -401,3 +442,63 @@ m.morph.stop.play;
 s.record;
 s.stopRecording;
 
+
+//morphMultiple play
+m.currentSounds
+m.currentSounds.add(\klavierwerke);
+m.currentSounds.add(\spotlight1);
+m.currentSounds.add(\spotlight2);
+m.currentSounds.add(\spotlight3);
+m.currentSounds.add(\entryGosh);
+m.currentSounds.add(\entryGoshClick);
+m.currentSounds.add(\entryGoshWahWah);
+m.currentSounds.add(\drumming);
+m.currentSounds.add(\fratres);
+m.currentSounds.add(\glacat);
+m.currentSounds.add(\arp1);
+m.currentSounds.add(\arp1Filter);
+m.currentSounds.add(\silence);
+m.currentSounds.add(\noise);
+
+m.currentSounds.remove(\klavierwerke);
+m.currentSounds.remove(\spotlight1);
+m.currentSounds.remove(\spotlight2);
+m.currentSounds.remove(\spotlight3);
+m.currentSounds.remove(\entryGosh);
+m.currentSounds.remove(\entryGoshClick);
+m.currentSounds.remove(\entryGoshWahWah);
+m.currentSounds.remove(\drumming);
+m.currentSounds.remove(\fratres);
+m.currentSounds.remove(\glacat);
+m.currentSounds.remove(\arp1);
+m.currentSounds.remove(\arp1Filter);
+m.currentSounds.remove(\silence);
+m.currentSounds.remove(\noise);
+
+m.morphMultiple.play
+
+//cycle
+m.cycle = 20;
+m.cycle = 10;
+m.cycle = 5;
+
+//nice combnations
+m.currentSounds = List[\entryGoshClick, \noise, \silence]
+m.currentSounds = List[\arp1Filter,  \silence, \fratres, \noise,  \arp1Filter, \silence]
+m.currentSounds = List[\entryGosh, \fratres, \spotlight3] //ending
+
+
+s.record;
+s.stopRecording;
+
+//score
+m.cycle = 5;
+~grain.play;
+~sample.play;
+m.morphMultiple.play
+m.currentSounds = List[\entryGoshClick, \noise, \silence]
+
+m.currentSounds.add(\fratres);
+m.currentSounds.add(\spotlight3);
+m.currentSounds.remove(\silence);
+m.currentSounds.remove(\noise);
