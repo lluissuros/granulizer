@@ -24,7 +24,7 @@ win.drawFunc = Routine {
 		win.view.removeAll;
 		win.view.decorator = FlowLayout(win.view.bounds);
 
-		//playMorph, free
+		//general controls
 		playButton = Button(win, Rect(0,0, 75, 24));
 		playButton.states = [["playMorph", Color.black, Color.green], ["stopMorph", Color.white, Color.blue]];
 		playButton.action = {|btn|
