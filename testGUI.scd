@@ -1,19 +1,19 @@
 
-b.sounds.size
-b.sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
-b.sounds.at(25)
-m.currentSoundsthis
+m[\sounds].size
+m[\sounds].keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
+m[\sounds].at(25)
+
 
 //GUI IMPORTANT
-m.morphMultiple.play
-m.cycle
+m[\morphMultiple].play
+m[\cycle]
 
 
 
 (
 // create an array of buttons representing available sounds.
 var win, label1, label2;
-var soundsSorted = b.sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
+var soundsSorted = m[\]sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
 
 win = Window("Granulizer", Rect(128, 64, 840, 360));
 win.name = "Granulizer";
