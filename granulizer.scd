@@ -34,42 +34,42 @@ s.stopRecording;
 var soundsRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Sounds/";
 var samplesRelativePath = thisProcess.nowExecutingPath.dirname +/+ "Samples/";
 
-b = b ? (); //buffers object
-b.soundsIndex = 0;
-b.discardButton = true; //workaround because button is called two times
-b.sounds = ();
-b.samples =();
+m = m ? (); //buffers object
+m.soundsIndex = 0;
+m.discardButton = true; //workaround because button is called two times
+m.sounds = ();
+m.samples =();
 //GrainBuf needs a mono source bufnum
-b.sounds.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
-b.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_filtered_lowered.wav" ,channels:[0]).bufnum;
-b.sounds.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_19_07_lowered.wav", channels:[0]).bufnum;
-b.sounds.allegro1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - allegro1_8_11_2013.wav", channels:[0]).bufnum;
-b.sounds.ensQuedem = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - ens quedem 7_07.wav", channels:[0]).bufnum;
-b.sounds.feedbackChords = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - feedbackchords.wav", channels:[0]).bufnum;
-b.sounds.quePortes = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - que portes 22_11_2015_SHORT.wav", channels:[0]).bufnum;
-b.sounds.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
-b.sounds.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
-b.sounds.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
-b.sounds.entryGoshClick = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_click.wav", channels:[0]).bufnum;
-b.sounds.entryGoshWahWah = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_wahwah.wav", channels:[0]).bufnum;
-b.sounds.fratresIntro= Buffer.readChannel(s,soundsRelativePath ++ "fratres intro.wav", channels:[0]).bufnum;
-b.sounds.fratres= Buffer.readChannel(s,soundsRelativePath ++ "Arvo Part - Fratres For Cello And Piano.wav", channels:[0]).bufnum;
-b.sounds.fostercare= Buffer.readChannel(s,soundsRelativePath ++ "Burial - Fostercare (HQ).wav", channels:[0]).bufnum;
-b.sounds.miserere= Buffer.readChannel(s,soundsRelativePath ++ "Gregorio Allegri- Miserere.wav", channels:[0]).bufnum;
-b.sounds.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake - Klavierwerke.wav", channels:[0]).bufnum;
-b.sounds.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
-b.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "funeral_canticle_chopped.wav", channels:[0]).bufnum;
-b.sounds.funeralShort= Buffer.readChannel(s, soundsRelativePath ++ "funeral_chopped_short.wav", channels:[0]).bufnum;
-b.sounds.silence= Buffer.readChannel(s, soundsRelativePath ++ "silence.aif", channels:[0]).bufnum;
-b.sounds.noise= Buffer.readChannel(s, soundsRelativePath ++ "noiseSnr.aif", channels:[0]).bufnum;
-b.sounds.spotlight1= Buffer.readChannel(s, soundsRelativePath ++ "spotlight1.wav", channels:[0]).bufnum;
-b.sounds.spotlight2= Buffer.readChannel(s, soundsRelativePath ++ "spotlight2.wav", channels:[0]).bufnum;
-b.sounds.spotlight3= Buffer.readChannel(s, soundsRelativePath ++ "spotlight3.wav", channels:[0]).bufnum;
+m.sounds.pater = Buffer.read(s, soundsRelativePath ++ "pater_noe.aif",channels:[0]).bufnum;
+m.sounds.arp1Filter =  Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_filtered_lowered.wav" ,channels:[0]).bufnum;
+m.sounds.arp1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - arpegio1_19_07_lowered.wav", channels:[0]).bufnum;
+m.sounds.allegro1 = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - allegro1_8_11_2013.wav", channels:[0]).bufnum;
+m.sounds.ensQuedem = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - ens quedem 7_07.wav", channels:[0]).bufnum;
+m.sounds.feedbackChords = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - feedbackchords.wav", channels:[0]).bufnum;
+m.sounds.quePortes = Buffer.readChannel(s,soundsRelativePath ++ "nechaev - que portes 22_11_2015_SHORT.wav", channels:[0]).bufnum;
+m.sounds.glacat = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - glaçat mastered.wav", channels:[0]).bufnum;
+m.sounds.noPuedeSer = Buffer.readChannel(s, soundsRelativePath ++ "nechaev - no puede ser.wav", channels:[0]).bufnum;
+m.sounds.entryGosh = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh.wav", channels:[0]).bufnum;
+m.sounds.entryGoshClick = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_click.wav", channels:[0]).bufnum;
+m.sounds.entryGoshWahWah = Buffer.readChannel(s, soundsRelativePath ++ "entryGosh_wahwah.wav", channels:[0]).bufnum;
+m.sounds.fratresIntro= Buffer.readChannel(s,soundsRelativePath ++ "fratres intro.wav", channels:[0]).bufnum;
+m.sounds.fratres= Buffer.readChannel(s,soundsRelativePath ++ "Arvo Part - Fratres For Cello And Piano.wav", channels:[0]).bufnum;
+m.sounds.fostercare= Buffer.readChannel(s,soundsRelativePath ++ "Burial - Fostercare (HQ).wav", channels:[0]).bufnum;
+m.sounds.miserere= Buffer.readChannel(s,soundsRelativePath ++ "Gregorio Allegri- Miserere.wav", channels:[0]).bufnum;
+m.sounds.klavierwerke= Buffer.readChannel(s, soundsRelativePath ++ "James Blake - Klavierwerke.wav", channels:[0]).bufnum;
+m.sounds.drumming= Buffer.readChannel(s, soundsRelativePath ++ "Steve Reich - Part IV - Drumming.wav", channels:[0]).bufnum;
+m.sounds.funeral= Buffer.readChannel(s, soundsRelativePath ++ "funeral_canticle_chopped.wav", channels:[0]).bufnum;
+m.sounds.funeralShort= Buffer.readChannel(s, soundsRelativePath ++ "funeral_chopped_short.wav", channels:[0]).bufnum;
+m.sounds.silence= Buffer.readChannel(s, soundsRelativePath ++ "silence.aif", channels:[0]).bufnum;
+m.sounds.noise= Buffer.readChannel(s, soundsRelativePath ++ "noiseSnr.aif", channels:[0]).bufnum;
+m.sounds.spotlight1= Buffer.readChannel(s, soundsRelativePath ++ "spotlight1.wav", channels:[0]).bufnum;
+m.sounds.spotlight2= Buffer.readChannel(s, soundsRelativePath ++ "spotlight2.wav", channels:[0]).bufnum;
+m.sounds.spotlight3= Buffer.readChannel(s, soundsRelativePath ++ "spotlight3.wav", channels:[0]).bufnum;
 
 //samples to trig
-b.samples.getsIntoCar =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - gets into car.wav").bufnum;
-b.samples.everyOneHAsAJob =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - everyone has a job.wav").bufnum;
-b.samples.actualizedFully =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - have you actualized fully.wav").bufnum;
+m.samples.getsIntoCar =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - gets into car.wav").bufnum;
+m.samples.everyOneHAsAJob =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - everyone has a job.wav").bufnum;
+m.samples.actualizedFully =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - have you actualized fully.wav").bufnum;
 
 //initialization:
 m = m ? ();//morpher object
@@ -99,12 +99,12 @@ m.morph = TaskProxy({
 		soundsToMorph.do { |item, i|
 			var percent = i*100/numSteps;
 			var sound = soundsToMorph.at(i);
-			var buf = b.sounds[sound];
+			var buf = m.sounds[sound];
 		//	["numSteps %", percent, " sound:", sound, " buf: "+ buf].postln;
 			~wavebuf = buf;
 			(1/m.stepsPerSec).wait;
 		};
-		~wavebuf = b.sounds[m.targetSound];
+		~wavebuf = m.sounds[m.targetSound];
 		m.previousSound = m.currentSound.copy;
 		m.currentSound = m.targetSound.copy;
 		["MORPH DONE. curent : " + m.currentSound].postln;
@@ -134,7 +134,7 @@ m.morphMultiple = TaskProxy({
 			};
 
 			~pan = soundProb -1 * panDirection * panDirectionByIndex;
-			~wavebuf = b.sounds[soundToPlay];
+			~wavebuf = m.sounds[soundToPlay];
 
 			//[index, soundProb, soundToPlay, (soundProb -1 * panDirection * panDirectionByIndex)].postln;
 		};
@@ -181,7 +181,7 @@ MIDIdef.cc(\slider0toSampleAmp,
 
 MIDIdef.cc(\buttonPlayGetsIntoCar,
 	{
-		var bufnum = b.samples.getsIntoCar;
+		var bufnum = m.samples.getsIntoCar;
 		("gets into car").postln;
 		~sample = {Pan4.ar(PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), loop: 0)) * ~sampleAmp};
 	},
@@ -189,7 +189,7 @@ MIDIdef.cc(\buttonPlayGetsIntoCar,
 
 MIDIdef.cc(\buttonPlayEveryoneHasAJob,
 	{
-		var bufnum = b.samples.everyOneHAsAJob;
+		var bufnum = m.samples.everyOneHAsAJob;
 		("everyOneHAsAJob").postln;
 		~sample = {Pan4.ar(PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), loop: 0)) * ~sampleAmp};
 	},
@@ -197,7 +197,7 @@ MIDIdef.cc(\buttonPlayEveryoneHasAJob,
 
 MIDIdef.cc(\buttonPlayActuallizedFully,
 	{
-		var bufnum = b.samples.actualizedFully;
+		var bufnum = m.samples.actualizedFully;
 		("actualizedFully").postln;
 		~sample = {Pan4.ar(PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), loop: 0)) * ~sampleAmp};
 	},
@@ -278,11 +278,11 @@ MIDIdef.cc(\slider2toMorphCrossFadeTime,
 
 MIDIdef.cc(\buttonPreviousNavigation,
 	{
-		b.discardButton= b.discardButton.not;
-		if(b.discardButton,{},{
+		m.discardButton= m.discardButton.not;
+		if(m.discardButton,{},{
 			var key;
-			b.soundsIndex = b.soundsIndex-1;
-			key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
+			m.soundsIndex = m.soundsIndex-1;
+			key = m.sounds.keys.asArray.wrapAt(m.soundsIndex);
 			m.targetSound = key.asSymbol;
 			("targetSound: " + key).postln;
 		})
@@ -291,11 +291,11 @@ MIDIdef.cc(\buttonPreviousNavigation,
 
 MIDIdef.cc(\buttonNextNavigation,
 	{
-		b.discardButton= b.discardButton.not;
-		if(b.discardButton,{},{
+		m.discardButton= m.discardButton.not;
+		if(m.discardButton,{},{
 			var key;
-			b.soundsIndex = b.soundsIndex+1;
-			key = b.sounds.keys.asArray.wrapAt(b.soundsIndex);
+			m.soundsIndex = m.soundsIndex+1;
+			key = m.sounds.keys.asArray.wrapAt(m.soundsIndex);
 			m.targetSound = key.asSymbol;
 			("targetSound: " + key).postln;
 		})
@@ -305,8 +305,8 @@ MIDIdef.cc(\buttonNextNavigation,
 
 MIDIdef.cc(\buttonPreviousToTarget,
 	{
-		b.discardButton= b.discardButton.not;
-		if(b.discardButton,{},{
+		m.discardButton= m.discardButton.not;
+		if(m.discardButton,{},{
 			m.targetSound = m.previousSound.copy;
 			("targetSound: " + m.targetSound).postln;
 		})
@@ -315,8 +315,8 @@ MIDIdef.cc(\buttonPreviousToTarget,
 
 MIDIdef.cc(\buttonEntryGosh,
 	{
-		b.discardButton= b.discardButton.not;
-		if(b.discardButton,{},{
+		m.discardButton= m.discardButton.not;
+		if(m.discardButton,{},{
 			var auxFadeTime = m.xfadeTime.copy;
 			m.targetSound = \entryGosh;
 			m.xfadeTime = 3;
@@ -330,8 +330,8 @@ MIDIdef.cc(\buttonEntryGosh,
 
 MIDIdef.cc(\buttonToGoMorph,
 	{
-		b.discardButton= b.discardButton.not;
-		if(b.discardButton,{},{
+		m.discardButton= m.discardButton.not;
+		if(m.discardButton,{},{
 			m.morph.stop.play;
 			("MORPH! ").postln;
 		})
@@ -353,7 +353,7 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 /*START TO PLAY*/
 (
 var numOutputs = s.options.numOutputBusChannels;
-~wavebuf = b.sounds.entryGosh;
+~wavebuf = m.sounds.entryGosh;
 m.currentSound = \entryGosh;
 
 ~triggerDensity = 50;
