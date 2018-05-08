@@ -147,9 +147,6 @@ m.morphMultiple = TaskProxy({
 
 			~pan = soundProb -1 * panDirection * panDirectionByIndex;
 			~wavebuf = m.sounds.soundToPlay;
-			soundToPlay.postln;
-			m.currentSoundDBs[soundToPlay].postln;
-			m.currentSoundDBs[soundToPlay].dbamp.postln;
 			~individualAmp = m.currentSoundDBs[soundToPlay].dbamp;
 
 			//[index, soundProb, soundToPlay, (soundProb -1 * panDirection * panDirectionByIndex)].postln;
