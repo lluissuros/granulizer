@@ -146,10 +146,16 @@ m.morphMultiple = TaskProxy({
 			};
 
 			~pan = soundProb -1 * panDirection * panDirectionByIndex;
-			~wavebuf = m.sounds.soundToPlay;
+			~wavebuf = m.sounds[soundToPlay];
 			~individualAmp = m.currentSoundDBs[soundToPlay].dbamp;
 
-			//[index, soundProb, soundToPlay, (soundProb -1 * panDirection * panDirectionByIndex)].postln;
+/*			[
+			soundProb,
+			soundToPlay,
+				m.sounds[soundToPlay],
+			m.currentSoundDBs[soundToPlay].dbamp
+			].postln;*/
+
 		};
 	(m.cycle/m.probabilityShape.size).wait;
 	};
@@ -176,7 +182,6 @@ Thus all channels will be cyclically panned through if a sawtooth wave from -1 t
 (
 var numOutputs = s.options.numOutputBusChannels;
 ~wavebuf = m.sounds.entryGosh;
-m.currentSound = \entryGosh;
 
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
@@ -204,7 +209,7 @@ m.currentSound = \entryGosh;
 
 ~grain = { arg envbuf = -1, wavebuf = 0;
 	GrainBuf.ar(numOutputs, ~trig.kr, ~grainDur.kr, ~wavebuf,
-		~rate.kr, ~filePosNoised.kr, 2, ~pan , envbuf) * ~ampNoised.kr
+		~rate.kr, ~filePosNoised.kr, 2, ~pan , envbuf, mul: ~ampNoised.ar)
 };
 ~grain.play;
 ~sample.play;
