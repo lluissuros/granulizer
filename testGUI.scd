@@ -1,19 +1,19 @@
 
-m[\sounds].size
-m[\sounds].keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
-m[\sounds].at(25)
+m.sounds.size
+m.sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
+m.sounds.at(25)
 
 
 //GUI IMPORTANT
-m[\morphMultiple].play
-m[\cycle]
+m.morphMultiple.play
+m.cycle
 
 
 
 (
 // create an array of buttons representing available sounds.
 var win, label1, label2;
-var soundsSorted = m[\]sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
+var soundsSorted = m.sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
 
 win = Window("Granulizer", Rect(128, 64, 840, 360));
 win.name = "Granulizer";
@@ -54,7 +54,7 @@ win.drawFunc = Routine {
 			btn.states = [[sound, Color.black, Color.rand]];
 			btn.string = sound;
 			btn.action = { |btn|
-				m.currentSounds.add(btn.string.asSymbol);
+				m.addSound(btn.string);
 				win.refresh;
 		}});
 
@@ -67,14 +67,31 @@ win.drawFunc = Routine {
 		label2.align = \center;
 
 		m.currentSounds.do({ arg sound;
-			var btn = Button(win, Rect(0,0, 75, 24));
+			var height = 16;
+			var btn = Button(win, Rect(0,0, 75, height));
+			var slider;
+			var spec = \db.asSpec;
+
 			btn.states = [[sound, Color.black, Color.rand]];
 			btn.string = sound;
 			btn.action = { |btn|
-				m.currentSounds.remove(btn.string.asSymbol);
+				m.removeSound(btn.string);
 				win.refresh;
-		}});
+			};
 
+			slider = EZSlider( win,         // parent
+              390@height,    // bounds
+              "",  // label
+              \db.asSpec,     // controlSpec
+				{ |sldr|
+					m.currentSoundDBs[sound]= sldr.value;
+					// {win.refresh}.defer(1)
+				}, //action
+				m.currentSoundDBs[sound]  //initialValue
+			);
+
+			win.view.decorator.nextLine;
+		});
         0.yield // stop here, return something unimportant
     }
 };
