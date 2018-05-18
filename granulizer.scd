@@ -1,5 +1,6 @@
 /*
 TODOS:
+ - Volume al sample, no al GrainBuf
 */
 
 (
@@ -62,8 +63,6 @@ m.samples.everyOneHAsAJob =Buffer.readChannel(s, samplesRelativePath ++ "Fargo -
 m.samples.actualizedFully =Buffer.readChannel(s, samplesRelativePath ++ "Fargo - have you actualized fully.wav").bufnum;
 
 //initialization:
-m.xfadeTime = 20;
-m.stepsPerSec = 10;
 m.cycle = 10;
 
 m.probabilityShape =  Wavetable.sineFill(512, 1.0/[1]).asArray[0..512]; //only take the postive part of sine
@@ -81,39 +80,6 @@ m.addSound =  {|self, soundName|
 m.removeSound = {|self, soundName|
 	m.currentSounds.remove(soundName);
 };
-
-//TODO: to be removed
-m.morph = TaskProxy({
-	var numSteps = m.xfadeTime * m.stepsPerSec;
-	var soundsToMorph = Array.new(numSteps+1);
-
-	(numSteps).do { |i|
-		var playTargetSound;
-		var targetSoundProbability;
-		targetSoundProbability = (i + 1) / numSteps;
-		playTargetSound = targetSoundProbability.coin;
-		if (playTargetSound, {soundsToMorph.add(m.targetSound.copy)}, {soundsToMorph.add(m.currentSound.copy)});
-	};
-
-	soundsToMorph.do{|item, i | [i," ",item].postln};
-
-	if (m.targetSound.notNil) {
-		soundsToMorph.do { |item, i|
-			var percent = i*100/numSteps;
-			var sound = soundsToMorph.at(i);
-			var buf = m.sounds.sound;
-		//	["numSteps %", percent, " sound:", sound, " buf: "+ buf].postln;
-			~wavebuf = buf;
-			(1/m.stepsPerSec).wait;
-		};
-		~wavebuf = m.sounds.m.targetSound;
-		m.previousSound = m.currentSound.copy;
-		m.currentSound = m.targetSound.copy;
-		["MORPH DONE. curent : " + m.currentSound].postln;
-	};
-}).quant_(0);		// no quantization so the task starts immediately
-
-
 
 m.morphMultiple = TaskProxy({
 	var panDirection = 1;
@@ -189,15 +155,14 @@ r = Routine {
 
 
 
-/*START TO PLAY*/
+/*DEFINE GLOVARS AND START TO PLAY*/
 (
 var numOutputs = s.options.numOutputBusChannels;
-~wavebuf = m.sounds.entryGosh;
+m.addSound(\entryGosh);
 
 ~triggerDensity = 50;
 ~trig = { Dust.kr(~triggerDensity)};
 
-//~grainDurDev = {MouseY.kr(0.05,15) + LFNoise0.kr(100,3)};
 
 ~grainDurDev = { MouseY.kr(0.05,10) };
 ~grainDur = {~grainDurDev + LFNoise0.kr(100,~grainDurDev.min(3))};
@@ -222,68 +187,19 @@ var numOutputs = s.options.numOutputBusChannels;
 	GrainBuf.ar(numOutputs, ~trig.kr, ~grainDur.kr, ~wavebuf,
 		~rate.kr, ~filePosNoised.kr, 2, ~pan , envbuf, mul: ~ampNoised.ar)
 };
+
 ~grain.play;
 ~sample.play;
+// TODO: more elegant ways of handling async in "asyncronous execution" help file, but it works :p
+SystemClock.sched(0.5, {m.morphMultiple.play});
 )
+
 
 /*STOP*/
 ~grain.stop;
 
 
-/*SOME SETTINGS, experimentation with control proxies*/
-~trig = { |dens=50| Impulse.kr(dens) };
-~rate = { LFNoise1.kr.range(0.5, 1.5) };
-~rate = { LFNoise1.kr.range(0.98, 1.02) };
-~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
-~grainDur = {MouseY.kr(0.5,25) + LFNoise0.kr(100,3)};
-~grainDur = {SinOsc.ar(0.05).range(0.05,10)};
-~trig = { |dens=50| Dust.kr(dens) };
-
-
-
-/*MORPH TO OTHER SOUNDS*/
-m.currentSound = \pater;
-
-m.targetSound = \pater;
-m.targetSound = \arp1Filter;
-m.targetSound = \arp1;
-m.targetSound = \allegro1;
-m.targetSound = \ensQuedem;
-m.targetSound = \quePortes;
-m.targetSound = \feedbackChords;
-m.targetSound = \glacat;
-m.targetSound = \noPuedeSer;
-m.targetSound = \entryGosh;
-m.targetSound = \entryGoshClick;
-m.targetSound = \entryGoshWahWah;
-m.targetSound = \fratresIntro;
-m.targetSound = \fratres;
-m.targetSound = \fostercare;
-m.targetSound = \miserere;
-m.targetSound = \klavierwerke;
-m.targetSound = \funeral;
-m.targetSound = \funeralShort;
-m.targetSound = \drumming;
-m.targetSound = \spotlight1;
-m.targetSound = \spotlight2;
-m.targetSound = \spotlight3;
-
-//MORPH SETTINGS
-m.xfadeTime = 1;
-m.xfadeTime = 20;
-m.stepsPerSec = 5;
-m.stepsPerSec = 1; //when low number there is no "leaks"
-//GO!
-m.morph.stop.play;
-
-
-
-s.record;
-s.stopRecording;
-
-
 //morphMultiple play
-m.currentSounds = List.new(0)
 m.currentSounds
 m.currentSoundDBs
 m.addSound(\klavierwerke);
@@ -316,7 +232,20 @@ m.removeSound(\arp1Filter);
 m.removeSound(\silence);
 m.removeSound(\noise);
 
-m.morphMultiple.play
+
+
+
+
+
+/*SOME SETTINGS:  */
+~trig = { |dens=50| Impulse.kr(dens) };
+~rate = { LFNoise1.kr.range(0.5, 1.5) };
+~rate = { LFNoise1.kr.range(0.98, 1.02) };
+~filePos = { MouseX.kr + LFNoise0.kr(100, 0.03) };
+~grainDur = {MouseY.kr(0.5,25) + LFNoise0.kr(100,3)};
+~grainDur = {SinOsc.ar(0.05).range(0.05,10)};
+~trig = { |dens=50| Dust.kr(dens) };
+
 
 //cycle
 m.cycle = 30;
@@ -329,10 +258,9 @@ m.currentSounds = List[\arp1Filter,  \silence, \fratres, \noise,  \arp1Filter, \
 m.currentSounds = List[\entryGosh, \fratres, \spotlight3] //ending
 
 
-s.record;
-s.stopRecording;
 
-//score
+
+//a score
 m.cycle = 5;
 ~grain.play;
 ~sample.play;
