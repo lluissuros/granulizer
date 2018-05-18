@@ -1,23 +1,13 @@
-/*DONES:
-BUG: --> el navegador de sounds no va bé
-BUG: circle pan broken
-OK --> Bug: MouseY ml ajustat
-TODO: -grainDur ha de tenir el centre sobre el 2
-
-
+/*
 TODOS:
-SAM: passar codi arp1 simplificat
--more panning modes besides circle --> i don't need the knob for pan
--mes truquis 4-chan
--passar arp1 filtered a 4-chan per poderho tocar
-
-
 */
 
 (
 s = Server.local;
 //s.options.numOutputBusChannels = 4;
-s.options.numOutputBusChannels = 2;
+//s.options.numOutputBusChannels = 2;
+s.options.numOutputBusChannels = 3;
+"This will play on ".post + s.options.numOutputBusChannels.post + " channels".postln;
 o = Server.internal.options;
 o.memSize = 2 ** 19;
 p = ProxySpace.push(s);
@@ -174,8 +164,29 @@ pos = pan position. Channels are evenly spaced over a cyclic period of 2.0 in po
 Thus all channels will be cyclically panned through if a sawtooth wave from -1 to +1 is used to modulate the pos.
 ==> basically, 0 is front, then 0.5 right, 1and -1 rear, -0.5 left
 ==> tmabe pots rotar desde 0 a 2 per fer una volta completa, nice!!
-
 */
+~panCentral = 0
+~panCentral = 2/3
+~panCentral = 4/3
+2/3
+4/3
+//uniform pan distribution in PanAZ
+~panDev = 1;
+~panDev = 0.3;
+~panDev = 0;
+
+50.do({"he".postln; 0.1.wait})
+(
+var r;
+r = Routine {
+    100.do({ arg a;
+		~panCentral = [0, 2/3, 4/3].choose;
+        1.wait;
+    });
+}.play;
+)
+
+
 
 
 /*START TO PLAY*/
@@ -308,7 +319,7 @@ m.removeSound(\noise);
 m.morphMultiple.play
 
 //cycle
-m.cycle = 20;
+m.cycle = 30;
 m.cycle = 10;
 m.cycle = 5;
 
