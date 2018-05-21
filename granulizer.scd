@@ -1,6 +1,7 @@
 /*
 TODOS:
  - Volume al sample, no al GrainBuf
+ - Adaptar Pan a PanAz
 */
 
 (
@@ -124,35 +125,6 @@ MIDIdef.freeAll;
 )
 
 
-/*
-PanAz
-pos = pan position. Channels are evenly spaced over a cyclic period of 2.0 in pos with 0.0 equal to channel zero and 2.0/numChans equal to channel 1, 4.0/numChans equal to channel 2, etc.
-Thus all channels will be cyclically panned through if a sawtooth wave from -1 to +1 is used to modulate the pos.
-==> basically, 0 is front, then 0.5 right, 1and -1 rear, -0.5 left
-==> tmabe pots rotar desde 0 a 2 per fer una volta completa, nice!!
-*/
-~panCentral = 0
-~panCentral = 2/3
-~panCentral = 4/3
-2/3
-4/3
-//uniform pan distribution in PanAZ
-~panDev = 1;
-~panDev = 0.3;
-~panDev = 0;
-
-50.do({"he".postln; 0.1.wait})
-(
-var r;
-r = Routine {
-    100.do({ arg a;
-		~panCentral = [0, 2/3, 4/3].choose;
-        1.wait;
-    });
-}.play;
-)
-
-
 
 
 /*DEFINE GLOVARS AND START TO PLAY*/
@@ -190,13 +162,54 @@ m.addSound(\entryGosh);
 
 ~grain.play;
 ~sample.play;
+
 // TODO: more elegant ways of handling async in "asyncronous execution" help file, but it works :p
 SystemClock.sched(0.5, {m.morphMultiple.play});
+SystemClock.sched(1, {
+	"/Users/lluissuros/Music/SuperCollider/SuperCollider Projects/granulizer/GUI_Buttons.scd".loadPaths
+});
+
 )
 
 
-/*STOP*/
-~grain.stop;
+
+
+
+
+
+
+
+/*
+PanAz
+pos = pan position. Channels are evenly spaced over a cyclic period of 2.0 in pos with 0.0 equal to channel zero and 2.0/numChans equal to channel 1, 4.0/numChans equal to channel 2, etc.
+Thus all channels will be cyclically panned through if a sawtooth wave from -1 to +1 is used to modulate the pos.
+==> basically, 0 is front, then 0.5 right, 1and -1 rear, -0.5 left
+==> tmabe pots rotar desde 0 a 2 per fer una volta completa, nice!!
+*/
+~panCentral = 0
+~panCentral = 2/3
+~panCentral = 4/3
+2/3
+4/3
+//uniform pan distribution in PanAZ
+~panDev = 1;
+~panDev = 0.3;
+~panDev = 0;
+
+50.do({"he".postln; 0.1.wait})
+(
+var r;
+r = Routine {
+    100.do({ arg a;
+		~panCentral = [0, 2/3, 4/3].choose;
+        1.wait;
+    });
+}.play;
+)
+
+
+
+
 
 
 //morphMultiple play
@@ -235,7 +248,8 @@ m.removeSound(\noise);
 
 
 
-
+/*STOP*/
+~grain.stop;
 
 /*SOME SETTINGS:  */
 ~trig = { |dens=50| Impulse.kr(dens) };
