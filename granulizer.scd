@@ -8,7 +8,7 @@ TODOS:
 s = Server.local;
 //s.options.numOutputBusChannels = 4;
 //s.options.numOutputBusChannels = 2;
-s.options.numOutputBusChannels = 3;
+s.options.numOutputBusChannels = 6;
 "This will play on ".post + s.options.numOutputBusChannels.post + " channels".postln;
 o = Server.internal.options;
 o.memSize = 2 ** 19;

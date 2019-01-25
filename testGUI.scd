@@ -1,18 +1,5 @@
-
-m.sounds.size
-m.sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
-m.sounds.at(25)
-
-
-//GUI IMPORTANT
-m.morphMultiple.play
-m.cycle
-
-
-
 (
-// create an array of buttons representing available sounds.
-var win, label1, label2;
+var win, label1, label2, label3;
 var soundsSorted = m.sounds.keys.asArray.sort({ |a, b| a > b }).reverse; //order alphabetically
 
 win = Window("Granulizer", Rect(128, 64, 840, 360));
@@ -58,10 +45,28 @@ win.drawFunc = Routine {
 				win.refresh;
 		}});
 
+		//General Controls
+		win.view.decorator.nextLine;
+		label3 = StaticText(win, win.view.bounds.width @ 24);
+		label3.string = "General Controls";
+		label3.stringColor = Color.black;
+		label3.background = Color.white;
+		label3.align = \center;
+
+		win.view.decorator.nextLine;
+		soundsSorted.do({ arg sound;
+			var btn = Button(win, Rect(0,0, 75, 24));
+			btn.states = [[sound, Color.black, Color.rand]];
+			btn.string = sound;
+			btn.action = { |btn|
+				m.addSound(btn.string);
+				win.refresh;
+		}});
+
 		//Current Sounds
 		win.view.decorator.nextLine;
 		label2 = StaticText(win, win.view.bounds.width @ 24);
-		label2.string = "Available Sounds";
+		label2.string = "Playing Sounds";
 		label2.stringColor = Color.black;
 		label2.background = Color.white;
 		label2.align = \center;
@@ -95,9 +100,6 @@ win.drawFunc = Routine {
         0.yield // stop here, return something unimportant
     }
 };
-
-//auto refresh
-// { while { win.isClosed.not } { win.refresh; 5.wait; } }.fork(AppClock);
 
 win.front;
 )
