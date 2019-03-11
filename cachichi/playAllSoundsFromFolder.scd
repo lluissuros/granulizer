@@ -3,32 +3,100 @@
 * Voices: haave the vowels play like Pbind, and from time to time a longer voice(a word, a a sentence). Add the bird dataset!
 */
 
-~catAndDogsPath = "/Users/lluissuros/Documents/Datasets/audio-cats-and-dogs/cats_dogs/";
-~ocellsPath = "/Users/lluissuros/Documents/Datasets/CLO-43SD-AUDIO/audio/"
-~fargoVowelsPath = "/Users/lluissuros/Music/Praat/english_vowels_fargo1/vowels/"
-~shortSoundsPath = "/Users/lluissuros/Music/SuperCollider/SuperCollider Projects/granulizer/cachichi/shortSounds/"
+Buffer.freeAll; //ojo tu que borra todo
+
+
 
 (
-//load Sounds from a folder
-var soundFileNames, audioFolderPath, buffers;
-//var soundsFilenames = ("sounds".resolveRelative +/+ "*").pathMatch;
-~sounds = Dictionary.new;
-audioFolderPath = ~shortSoundsPath;
-soundFileNames = (audioFolderPath +/+ "*").pathMatch;
-buffers = soundFileNames.collect({arg path; Buffer.readChannel(s, path, channels:[0]) });
-buffers.do({ arg n, index; ~sounds.add(index -> n) });
+//================================================================
+//========================= FUNCTIONS ============================
+//================================================================
 
-"sounds loaded into buffers...".postln;
+
+//creates a dict from the folders/files inside the given folder, flat Dictionary
+~createSoundsFlatDict = {
+	|soundsFolderPath=("shortSounds".resolveRelative)|
+	var soundsDict = Dictionary.new;
+	var subfolders = PathName(soundsFolderPath).entries;
+
+	postf(" % subfolders found... \n", subfolders.size);
+
+	if(subfolders == 0){
+		//load from the folder
+		var soundFilePaths = (soundsFolderPath +/+ "*").pathMatch;
+		var buffers = soundFilePaths.collect({|path| Buffer.readChannel(s, path, channels:[0]) });
+		"loading...".postln;
+		buffers.do({ arg n, index;
+			index = soundsDict.size;
+			soundsDict.add(index -> n) });
+	}
+	{
+		//load from subfolders
+		subfolders.do{ |subfolder|
+			var subfolderName = subfolder.folderName;
+			var soundFilePaths = (soundsFolderPath +/+ subfolderName +/+ "*").pathMatch;
+			var buffers = soundFilePaths.collect({|path| Buffer.readChannel(s, path, channels:[0]) });
+			postf("  \n ... loading % subfolder: \n", subfolderName);
+			buffers.do({ arg n, index;
+				index = soundsDict.size;
+				soundsDict.add(index -> n) });
+		};
+
+	};
+	"sounds loaded into buffers...".postln;
+	soundsDict;
+};
+
+
+//creates a dict, organized in folders
+~createSoundsFolderedDict = {
+	|soundsFolderPath=("shortSounds".resolveRelative)|
+	var soundsDict = Dictionary.new;
+
+	postf(" % subfolders found... \n", PathName(soundsFolderPath).entries.size);
+
+	PathName(soundsFolderPath).entries.do{ |subfolder|
+		var subfolderName = subfolder.folderName;
+		postf("  \n ... loading % subfolder: \n", subfolderName);
+
+		soundsDict.add(
+			subfolderName.asSymbol ->
+			subfolder.entries.collect({ |path, i|
+				//postf("  * %  \n",  path.fileNameWithoutExtension);
+				Buffer.readChannel(s, subfolder.entries[i].fullPath, channels:[0])
+			});
+		);
+	};
+
+	"\n ...loading complete \n";
+	soundsDict;
+};
+
 )
+
+
+~sounds = ~createSoundsFlatDict.();
+
+~sounds.size
+~sounds[8000]
+
+
+~soundsFoldered = ~createSoundsFolderedDict.()
+
+
+
+
 
 
 
 (
 SynthDef(\simpleBufPlayer, {
-	arg buf=0, rate=1, sPos=0, amp=0.1, out=0, loop=0;
+	arg buf=0, rate=1, sPos=0, amp=0.1, out=0, loop=0,
+	atk=0.1, sus=0.2, rel=0.1;
 	var sig, env;
+	env = EnvGen.kr(Env([0,1,1,0],[atk,sus,rel],[1,0,-1]),doneAction:2);
 	sig = PlayBuf.ar(1, buf, rate*BufRateScale.ir(buf),startPos:sPos, loop:loop, doneAction:2);
-	Out.ar(out, Mix.ar(sig*amp));
+	Out.ar(out, Mix.ar(sig*env*amp));
 }).add;
 )
 
@@ -76,7 +144,7 @@ SynthDef(\simpleBufPlayer, {
 			\amp, 0.03
 		]);
 
-		(soundDur/[10,20,50,30].choose).wait;
+		(1/[10,20,50,30].choose).wait;
     });
 });
 )
