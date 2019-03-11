@@ -6,11 +6,21 @@
 Buffer.freeAll; //ojo tu que borra todo
 
 
-
 (
 //================================================================
 //========================= FUNCTIONS ============================
 //================================================================
+var addBuffersToDict= { |folderPath, soundsDict|
+	var soundFilePaths = (folderPath +/+ "*").pathMatch;
+	var buffers = soundFilePaths.collect({|path| Buffer.readChannel(s, path, channels:[0]) });
+	postf("  \n ... loading % subfolder: \n", folderPath.folderName);
+
+	buffers.do({|buf|
+		// like this, it has easy acces such as ~soundsDict[9000]
+		var key = soundsDict.size;
+		soundsDict.add(key -> buf ) });
+};
+
 
 
 //creates a dict from the folders/files inside the given folder, flat Dictionary
@@ -21,70 +31,60 @@ Buffer.freeAll; //ojo tu que borra todo
 
 	postf(" % subfolders found... \n", subfolders.size);
 
-	if(subfolders == 0){
-		//load from the folder
-		var soundFilePaths = (soundsFolderPath +/+ "*").pathMatch;
-		var buffers = soundFilePaths.collect({|path| Buffer.readChannel(s, path, channels:[0]) });
-		"loading...".postln;
-		buffers.do({ arg n, index;
-			index = soundsDict.size;
-			soundsDict.add(index -> n) });
-	}
+	if(subfolders == 0)
 	{
-		//load from subfolders
-		subfolders.do{ |subfolder|
-			var subfolderName = subfolder.folderName;
-			var soundFilePaths = (soundsFolderPath +/+ subfolderName +/+ "*").pathMatch;
-			var buffers = soundFilePaths.collect({|path| Buffer.readChannel(s, path, channels:[0]) });
-			postf("  \n ... loading % subfolder: \n", subfolderName);
-			buffers.do({ arg n, index;
-				index = soundsDict.size;
-				soundsDict.add(index -> n) });
-		};
+		addBuffersToDict.(soundsFolderPath, soundsDict)}
+	{
+		subfolders.do{ addBuffersToDict.( _ , soundsDict)}};
 
-	};
 	"sounds loaded into buffers...".postln;
 	soundsDict;
 };
 
 
-//creates a dict, organized in folders
+/*
+Creates a dict, organized in subfolders as (subolder:BufferList, subolder:BufferList)
+Expects a subfolder structure
+*/
 ~createSoundsFolderedDict = {
 	|soundsFolderPath=("shortSounds".resolveRelative)|
 	var soundsDict = Dictionary.new;
+	var subfolders = PathName(soundsFolderPath).entries;
 
-	postf(" % subfolders found... \n", PathName(soundsFolderPath).entries.size);
-
-	PathName(soundsFolderPath).entries.do{ |subfolder|
+	subfolders.do({ |subfolder|
 		var subfolderName = subfolder.folderName;
-		postf("  \n ... loading % subfolder: \n", subfolderName);
+		var subfolderDict = Dictionary.new;
+		addBuffersToDict.( subfolder, subfolderDict);
+		soundsDict.add( subfolderName.asSymbol -> subfolderDict );
+	});
 
-		soundsDict.add(
-			subfolderName.asSymbol ->
-			subfolder.entries.collect({ |path, i|
-				//postf("  * %  \n",  path.fileNameWithoutExtension);
-				Buffer.readChannel(s, subfolder.entries[i].fullPath, channels:[0])
-			});
-		);
-	};
+	"\n ...loading complete, following keys:".postln;
+	soundsDict.keys.do({ |key| key.postln });
 
-	"\n ...loading complete \n";
 	soundsDict;
 };
 
 )
 
 
+
+
+
+
+x = Dictionary.new();
+y = ~addBuffersToDict.(PathName("shortSounds".resolveRelative).entries[0], x);
+y.at(500)
+x[1000]
+
+//test
+PathName("shortSounds".resolveRelative).entries[0]
+
+
 ~sounds = ~createSoundsFlatDict.();
-
-~sounds.size
-~sounds[8000]
-
-
+//this will allow more control...
 ~soundsFoldered = ~createSoundsFolderedDict.()
-
-
-
+~soundsFoldered[\birdsAudio].size
+~soundsFoldered.keys.do({ |key| key.postln });
 
 
 
@@ -105,7 +105,7 @@ SynthDef(\simpleBufPlayer, {
 (
 
 ~inOrder = Task({
-	    (0..~sounds.size-1).pyramid(3).do({ arg i;
+	(0..~sounds.size-1).pyramid(3).do({ arg i;
 		var out = if(i.even){0}{1};
 		var soundDur = ~sounds[i].duration;
 		i.postln;
@@ -131,7 +131,7 @@ SynthDef(\simpleBufPlayer, {
 (
 //not so random but quite
 ~inRandom = Task({
-	    (0..~sounds.size-1).perfectShuffle.perfectShuffle.do({
+	10000.do({
 		var i = ~sounds.size.rand;
 		var out = if(i.even){0}{1};
 
@@ -157,8 +157,34 @@ SynthDef(\simpleBufPlayer, {
 ~inRandom.stop;
 
 
+(
+//not so random but quite
+~folderRandom = Task({
+	var folderDict = ~soundsFoldered[\birdsAudio];
+	1000.do({
+		var i = folderDict.size.rand;
+		var out = if(i.even){0}{1};
+		var soundDur = folderDict[i].duration;
+		i.postln;
 
+		Synth(\simpleBufPlayer,[
+			\buf, folderDict[i],
+			\out, out,
+			\amp, 0.03
+		]);
 
+		(1/[10,20,50,30].choose).wait;
+    });
+});
+)
+
+~soundsFoldered[\birdsAudio][200].duration
+
+~folderRandom.start;
+~folderRandom.pause;
+~folderRandom.resume;
+~folderRandom.reset;
+~folderRandom.stop;
 
 
 
