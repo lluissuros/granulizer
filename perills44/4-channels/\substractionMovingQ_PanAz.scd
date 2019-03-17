@@ -83,7 +83,7 @@ Pbindef(\movingQ1, 	\pan, Prand(Array.series(21, -1, 0.1) ,inf));
 Pbindef(\movingQ1).play;
 Pbindef(\movingQ1).stop;
 Pbindef(\movingQ1, \dur, Pseq([2,5]*3, inf));
-Pbindef(\movingQ1, \amp, Prand([0.1,0.1,0.05]/4,inf));
+Pbindef(\movingQ1, \amp, Prand([0.1,0.1,0.05]/2,inf));
 Pbindef(\movingQ1, \revMix, Prand([1,0.8],inf))
 
 Pbindef(\movingQ1, \degree, Pseq([0 ,3, 5, 6, 7]-2,inf))
