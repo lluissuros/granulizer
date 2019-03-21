@@ -817,6 +817,7 @@ Pbindef(\morphAzVib,\sPos, Pseq([0.35, 0.7].stutter(100)), inf);
 (
 Pbindef(\morphFront, \sPos, Pdefn(\incrementally_0_to_1_millis_and_back).stutter(1));
 Pbindef(\morphAzVib, \sPos, Pdefn(\incrementally_0_to_1_millis_and_back).stutter(1));
+Pbindef(\morphAzSurr, \sPos, Pdefn(\incrementally_0_to_1_millis_and_back).stutter(1));
 )
 Pbindef(\morphFront, \sPos, 0.1);
 Pbindef(\morphFront, \sPos, 0.6);
@@ -857,6 +858,8 @@ Pbindef(\morphAzVib).stop
 ~removeActiveSoundAt.(0);
 ~removeActiveSoundAt.(1);
 ~removeActiveSoundAt.(3);
+~removeActiveSoundAt.(3);
+~removeActiveSoundAt.(4);
 
 
 ~addActiveSound.("silence");
@@ -937,6 +940,7 @@ Pbindef(\morphAzSurr).stop
 ~infiniteHoldReverbPA.set(\feedback, 0.3);
 ~infiniteHoldReverbVib.set(\feedback, 0.3);
 ~infiniteHoldReverbSurr.set(\feedback, 0.3);
+
 ~infiniteHoldReverbPA.set(\feedback, 0.47);
 ~infiniteHoldReverbPA.set(\feedback, 0.49);
 
@@ -945,6 +949,7 @@ Pbindef(\morphAzSurr).stop
 (
 ~stresonUpRand.stop;
 ~stresonUpRand = Task({
+	"start".postln;
 	20000.do({|i|
 		var waitTimes = [1,2,5,10];
 		var delayTime = i.rand * 0.0001;
@@ -966,12 +971,13 @@ Pbindef(\morphAzSurr).stop
 (
 ~changeMapOut1.stop;
 ~changeMapOut1 = Task({
+	"start".postln;
 	20000.do({|i|
 		var waitTimes = [1,2,5,10];
 
 
 		var func = [
-			~mapOut[\allClean],
+			//~mapOut[\allClean],
 			~mapOut[\allInfiniteReverb],
 			~mapOut[\allReverb1],
 			~mapOut[\allReverb0],
@@ -999,3 +1005,13 @@ Pbindef(\morphAzSurr).stop
 
 
 
+
+//amp
+
+Pbindef(\morphFront, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 3) //less amp
+Pbindef(\morphAzVib, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 4) //less amp
+Pbindef(\morphAzSurr, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 9) //less amp
+
+
+Pbindef(\morphFront).play
+Pbindef(\morphAzSurr).play
