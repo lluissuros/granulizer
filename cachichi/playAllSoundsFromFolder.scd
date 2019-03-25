@@ -101,8 +101,8 @@ var vowels3 = ["shortSounds".resolveRelative, "vowelsPianista"].join("/");
 
 
 ~soundsFoldered= Dictionary.new;
-~soundsFoldered[\esc50] = ~createDictFromFolder.(esc50.fullPath);
-~soundsFoldered[\birds] = ~createDictFromFolder.(birds.fullPath);
+~soundsFoldered[\esc50] = ~createDictFromFolder.(esc50);
+~soundsFoldered[\birds] = ~createDictFromFolder.(birds);
 ~soundsFoldered[\vowels1] = ~createDictFromFolder.(vowels1);
 ~soundsFoldered[\vowels2] = ~createDictFromFolder.(vowels2);
 ~soundsFoldered[\vowels3] = ~createDictFromFolder.(vowels3);
@@ -178,7 +178,7 @@ SynthDef(\substractionMovingQBuf, {
 };
 
 ~getBufAt = {|index, soundFolder = \esc50|
-	index.postln;
+	//index.postln;
 	~soundsFoldered[soundFolder.asSymbol].at(index);
 };
 
@@ -191,21 +191,22 @@ SynthDef(\substractionMovingQBuf, {
 (
 Pbindef(\movingQESC50,
 	\instrument, \substractionMovingQBuf,
-//	\buf, Pfunc({~getBufAt.([1050,900].choose, \esc50)}).stutter(10),
+//	\buf, Pfunc({~getBufAt.([1050].choose, \esc50)}).stutter(10),
 //	\buf, Pfunc({~getRandBuf.(\esc50)}).stutter(10),
+	\buf, Pfunc({~getRandBuf.(\birds)}).stutter(1),
 	\buf, Pfunc({~getBufAt.(~niceSoundESCLong.choose,\esc50)}).stutter(10),
-	\dur, Pseq([3,5,7]/10,inf),
+	\dur, Pseq([3,5,7]/15,inf),
 	\loop, 1,
 	\release, 1,
 	\attack, 3,
 	\sustain,5,
-	\amp, Pxrand([0.3,0.5,0.7]* 0.7,inf),
+	\amp, Pxrand([0.3,0.5,0.7]* 0.25,inf),
 	\revMix, Prand([1,0.8,0.5,0.3,0.1],inf),
-	\out, Pxrand([0,1,2,3,4,5,6,7], inf), //everywhere,
+	\out, Pxrand([2,3,4,5,6,7], inf), //everywhere,
 	\pan, Pseq(Array.series(21, -1, 0.1) ,inf),
 	\panwidth, 1,
 	\rate, Pseq([0].midiratio, inf),
-	\rate, Pseq([2,1,0.5].stutter(4), inf),
+//	\rate, Pseq([2,1,0.5].stutter(4), inf),
 	\degree, Pseq([0 ,3, 5, 6, 7]-2,inf),
 	\octave, Pseq([2,3,4,5],inf)
 );
@@ -227,21 +228,22 @@ Pbindef(\movingQESC50).stop;
 
 //play with release
 (
-Pbindef(\movingQESC50, \buf, Pfunc(~getBufAt.(1050)).stutter(10),
-	\release, Pseq((1..50).mirror/10,inf).trace);
+Pbindef(\movingQESC50, \buf, Pfunc(~getBufAt.([1050].choose, [\esc50, \birds].choose)).stutter(10),
+	\release, Pseq((1..50).mirror/15,inf));
 )
 
+
+Pbindef(\movingQESC50, \buf, Pfunc(~getBufAt.(1050)).stutter(10));
 
 Pbindef(\movingQESC50, \dur, Pseq([3,5,7]/2,inf));
 
 Pbindef(\movingQESC50, \degree, Pseq([0,3,6],inf)).stutter(4);
-Pbindef(\movingQESC50, \octave, Pseq([2,3,7,5,2,11],inf)).stutter(4);
+Pbindef(\movingQESC50, \octave, Pseq([2,3,5,7,10,11],inf)).stutter(4);
 Pbindef(\movingQESC50, \octave, Pseq([2,3,4,5,6],inf)).stutter(4);
 Pbindef(\movingQESC50, \revMix, Pseq([0.8,0.9,1],inf));
-Pbindef(\movingQESC50, \amp, Pxrand([0.3,0.5,0.7]*0.6,inf));
+Pbindef(\movingQESC50, \amp, Pxrand([0.3,0.5,0.7]*0.8,inf));
 Pbindef(\movingQESC50, \scale, Scale.kumoi.tuning_(\just));
 
-Pbindef(\movingQESC50, \buf, Pfunc({~getBufAt.([1050, 900, 1492].choose)}).stutter(10));
 
 
 //outs

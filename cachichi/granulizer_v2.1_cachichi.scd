@@ -585,7 +585,7 @@ s.waitForBoot({
 		],[0.999,0.01,0.01, 0.01].normalizeSum,inf),
 		\pan, Pdefn(\morphPanner),
 		\prob, Pfunc({~soundToPlay[\prob]}),
-		\amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob),
+		\amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) /9, //quite low,
 		\out, Pwrand( [~buses[\reverb0PA], ~buses[\reverb1PA]], [0.95,0.05], inf),
 	);
 
@@ -611,7 +611,7 @@ s.waitForBoot({
 //		\pan, Pdefn(\morphPanner),
 		\pan, Pseq((-10..10)*0.1, inf),
 		\prob, Pfunc({~soundToPlay[\prob]}),
-		\amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob),
+		\amp, Pseq([Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob)/4,
 	);
 
 
@@ -637,7 +637,7 @@ s.waitForBoot({
 //		\pan, Pdefn(\morphPanner),
 		\pan, Pseq((-10..10)*0.1, inf),
 		\prob, Pfunc({~soundToPlay[\prob]}),
-		\amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob),
+		\amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) /9,
 	);
 
 
@@ -857,9 +857,11 @@ Pbindef(\morphAzVib).stop
 ~removeActiveSound.("chords_organ2");
 ~removeActiveSoundAt.(0);
 ~removeActiveSoundAt.(1);
+~removeActiveSoundAt.(2);
 ~removeActiveSoundAt.(3);
 ~removeActiveSoundAt.(3);
 ~removeActiveSoundAt.(4);
+~removeActiveSoundAt.(5);
 
 
 ~addActiveSound.("silence");
@@ -891,7 +893,9 @@ Pbindef(\morphAzVib).stop
 ~logActiveSounds.();
 
 ~probCycleDurSeconds = 0.1
+~probCycleDurSeconds = 1
 ~probCycleDurSeconds = 10
+~probCycleDurSeconds = 15
 ~probCycleDurSeconds = 20
 ~probCycleDurSeconds = 40
 
@@ -912,10 +916,13 @@ s.stopRecording
 
 
 
+(
 Pbindef(\morphFront).play
 Pbindef(\morphAzVib).play
 Pbindef(\morphAzSurr).play
+)
 
+//prefer decrease amp
 Pbindef(\morphFront).stop
 Pbindef(\morphAzVib).stop
 Pbindef(\morphAzSurr).stop
@@ -937,10 +944,16 @@ Pbindef(\morphAzSurr).stop
 
 
 
+(
 ~infiniteHoldReverbPA.set(\feedback, 0.3);
 ~infiniteHoldReverbVib.set(\feedback, 0.3);
 ~infiniteHoldReverbSurr.set(\feedback, 0.3);
-
+)
+(
+~infiniteHoldReverbPA.set(\feedback, 0.45);
+~infiniteHoldReverbVib.set(\feedback, 0.45);
+~infiniteHoldReverbSurr.set(\feedback, 0.45);
+)
 ~infiniteHoldReverbPA.set(\feedback, 0.47);
 ~infiniteHoldReverbPA.set(\feedback, 0.49);
 
@@ -977,7 +990,7 @@ Pbindef(\morphAzSurr).stop
 
 
 		var func = [
-			//~mapOut[\allClean],
+			~mapOut[\allClean],
 			~mapOut[\allInfiniteReverb],
 			~mapOut[\allReverb1],
 			~mapOut[\allReverb0],
@@ -1008,9 +1021,9 @@ Pbindef(\morphAzSurr).stop
 
 //amp
 
-Pbindef(\morphFront, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 3) //less amp
-Pbindef(\morphAzVib, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 4) //less amp
-Pbindef(\morphAzSurr, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 9) //less amp
+Pbindef(\morphFront, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 90) //less amp
+Pbindef(\morphAzVib, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 90) //less amp
+Pbindef(\morphAzSurr, \amp, Pseq( [Pexprand(0.1,0.35,1), Pexprand(0.001,0.09,3)],inf) * Pkey(\prob) / 99) //less amp
 
 
 Pbindef(\morphFront).play
