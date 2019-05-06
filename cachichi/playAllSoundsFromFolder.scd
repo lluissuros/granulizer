@@ -81,39 +81,38 @@ Expects a subfolder structure
 	addBuffersToDict.( subfolder, subfolderDict);
 };
 
-)
 
-
-
-
+~makeSoundsFoldered = {
 //DATASET FOLDERS, create Dictionary:
-(
-var datasetFolder = PathName("/Users/lluissuros/Documents/Datasets/");
+	var datasetFolder = PathName("/Users/lluissuros/Documents/Datasets/");
 
-var urban = (datasetFolder +/+ PathName("urban-sound-classification/train/Train/")).fullPath;
-var birds = (datasetFolder +/+  PathName("CLO-43SD-AUDIO/audio/")).fullPath;
-var ff1010bird = (datasetFolder +/+ PathName("ff1010bird_wav/")).fullPath;
-var esc50 = (datasetFolder +/+ PathName("ESC-50-master/audio/")).fullPath;
+	var urban = (datasetFolder +/+ PathName("urban-sound-classification/train/Train/")).fullPath;
+	var birds = (datasetFolder +/+  PathName("CLO-43SD-AUDIO/audio/")).fullPath;
+	var ff1010bird = (datasetFolder +/+ PathName("ff1010bird_wav/")).fullPath;
+	var esc50 = (datasetFolder +/+ PathName("ESC-50-master/audio/")).fullPath;
 
-var vowels1 = ["shortSounds".resolveRelative, "vowelsFargo1"].join("/");
-var vowels2 = ["shortSounds".resolveRelative, "vowelsFargo2"].join("/");
-var vowels3 = ["shortSounds".resolveRelative, "vowelsPianista"].join("/");
-
-
-~soundsFoldered= Dictionary.new;
-~soundsFoldered[\esc50] = ~createDictFromFolder.(esc50);
-~soundsFoldered[\birds] = ~createDictFromFolder.(birds);
-~soundsFoldered[\vowels1] = ~createDictFromFolder.(vowels1);
-~soundsFoldered[\vowels2] = ~createDictFromFolder.(vowels2);
-~soundsFoldered[\vowels3] = ~createDictFromFolder.(vowels3);
-
-)
+	var vowels1 = ["shortSounds".resolveRelative, "vowelsFargo1"].join("/");
+	var vowels2 = ["shortSounds".resolveRelative, "vowelsFargo2"].join("/");
+	var vowels3 = ["shortSounds".resolveRelative, "vowelsPianista"].join("/");
 
 
+	~soundsFoldered= Dictionary.new;
+	~soundsFoldered[\esc50] = ~createDictFromFolder.(esc50);
+	~soundsFoldered[\birds] = ~createDictFromFolder.(birds);
+	~soundsFoldered[\vowels1] = ~createDictFromFolder.(vowels1);
+	~soundsFoldered[\vowels2] = ~createDictFromFolder.(vowels2);
+	~soundsFoldered[\vowels3] = ~createDictFromFolder.(vowels3);
+};
+
+~makeSoundsFoldered.();
 
 
 
-(
+"Folders created:".postln();
+~soundsFoldered.keys.post();
+
+
+
 SynthDef(\simpleBufPlayer, {
 	arg buf=0, rate=1, sPos=0, amp=0.1, out=0, loop=0,
 	atk=1.1, sus=0.3, rel=1.1;
@@ -160,32 +159,26 @@ SynthDef(\substractionMovingQBuf, {
     Out.ar(out, PanAz.ar(2, Mix.ar(sig), pan) );
 	}
 ).add;
-)
 
 
-
-
-
-(
 
 ~niceSoundsESC = [2, 1050, 900, 20, 1658, 571, 1160, 1370, 1099, 1829, 34, 689, 709, 630, 738, 1844, 107, 1492, 450, 411, 1084, 492, 611, 950, 1629, 1297];
 ~niceSoundESCLong = [1050, 900, 1492];
 
 
-~getRandBuf = {|soundFolder = \esc50|
+~getRandBuf = {|soundFolder = \esc50, logIndex=false|
 	var index = ~soundsFoldered[soundFolder.asSymbol].size.rand;
+	if(logIndex){index.postln}{};
 	~getBufAt.(index, soundFolder);
 };
 
-~getBufAt = {|index, soundFolder = \esc50|
-	//index.postln;
+~getBufAt = {|index, soundFolder = \esc50, logIndex=false|
+	if(logIndex){index.postln}{};
 	~soundsFoldered[soundFolder.asSymbol].at(index);
 };
 
 )
 
-
-~soundsFoldered.keys
 
 
 (

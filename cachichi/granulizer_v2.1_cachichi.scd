@@ -26,11 +26,31 @@ s.options.inDevice_(
 	//"Soundflower (2ch)"
 );
 
+//TODO delete HACK for concert
+//slider volumes for nanokontrol
+~morphAmp= Bus.control(s, 1);
+~snaresAmp= Bus.control(s, 1);
+~buffRissAmp= Bus.control(s, 1);
+~oneShotAmp= Bus.control(s, 1);
+~movingQAmp= Bus.control(s, 1);
+~rissetFXAmp= Bus.control(s, 1);
+~returnOutAmp= Bus.control(s, 1);
+~masterAmp= Bus.control(s, 1);
+
+~morphAmp.set(1);
+~snaresAmp.set(1);
+~buffRissAmp.set(1);
+~oneShotAmp.set(1);
+~movingQAmp.set(1);
+~rissetFXAmp.set(1);
+~returnOutAmp.set(1);
+~masterAmp.set(1);
+
 
 
 s.options.numOutputBusChannels_(8);
 
-s.options.numInputBusChannels_(2);
+s.options.numInputBusChannels_(4);
 s.options.sampleRate_(44100);
 s.options.memSize_(2.pow(20));
 s.newBusAllocators;
@@ -84,6 +104,7 @@ ServerQuit.removeAll;
 	~buses.add(\infiniteReverbPA -> Bus.audio(s, 2));
 	~buses.add(\infiniteReverbVib -> Bus.audio(s, 3)); //vibs
 	~buses.add(\infiniteReverbSurr -> Bus.audio(s, 3)); //extra surr
+	~buses.add(\infiniteReverbQuad-> Bus.audio(s, 4)); //quadraphonic
 
 	~buses.add(\reverb0PA -> Bus.audio(s, 2));
 	~buses.add(\reverb0Vib -> Bus.audio(s, 3)); //vibs
@@ -92,11 +113,22 @@ ServerQuit.removeAll;
 	~buses.add(\reverb1PA -> Bus.audio(s, 2));
 	~buses.add(\reverb1Vib -> Bus.audio(s, 3)); //vibs
 	~buses.add(\reverb1Surr -> Bus.audio(s, 3)); //extra surr
+	~buses.add(\reverb1Quad-> Bus.audio(s, 4)); //quadraphonic
 
 	~buses.add(\stresonPA -> Bus.audio(s, 2));
 	~buses.add(\stresonVib -> Bus.audio(s, 3)); //vibs
 	~buses.add(\stresonSurr -> Bus.audio(s, 3)); //extra surr
 
+	~buses.add(\rissetFX -> Bus.audio(s,2));
+
+	~buses.add(\movingQFX -> Bus.audio(s,2));
+
+	~buses.add(\positionRissetFollowerFX -> Bus.audio(s,2));
+
+	~buses.add(\externalSend1 -> Bus.audio(s, 2));
+
+	~buses.add(\grainPan-> Bus.audio(s, 2));
+	~buses.add(\panAzCircle-> Bus.audio(s, 2));
 };
 
 
@@ -118,6 +150,7 @@ ServerQuit.removeAll;
 	~presetsDict.put(5, [ "entryGosh", "spot6", "silence" ]);
 	~presetsDict.put(6, [ "spot1", "entryGosh", "feedbackchords", "arpegio1_filtered_lowered" ]);
 	~presetsDict.put(7, ~sounds[\jazz_c].collect({ |buf| ~getBufFileName.(buf)}));
+	~presetsDict.put(8, [ "spot1", "spot3", "entryGosh", "glaçat", "entryGosh" ]);
 };
 
 ~buildPresets.();
@@ -200,7 +233,10 @@ ServerQuit.removeAll;
 	s.bind({
 		~mainGrp = Group.new;
 		~fxGrp = Group.after(~mainGrp);
-		~reverbGrp = Group.after(~fxGrp);
+		~externalGrp = Group.after(~fxGrp);
+		~spatializersGrp = Group.after(~externalGrp);
+		~reverbGrp = Group.after(~spatializersGrp);
+
 
 		"Creating Groups and FXs....".postln;
 
@@ -212,6 +248,7 @@ ServerQuit.removeAll;
 		~infiniteHoldReverbPA =  Synth(\infiniteHoldReverb_st, [\in, ~buses[\infiniteReverbPA], \out, 0, \mix, 0.5, \feedback, 0.45], ~reverbGrp);
 		~infiniteHoldReverbVib =  Synth(\infiniteHoldReverb_3chan, [\in, ~buses[\infiniteReverbVib], \out, 2, \mix, 0.5, \feedback, 0.45], ~reverbGrp);
 		~infiniteHoldReverbSurr =  Synth(\infiniteHoldReverb_3chan, [\in, ~buses[\infiniteReverbSurr], \out, 5, \mix, 0.5, \feedback, 0.45], ~reverbGrp);
+		~infiniteHoldReverbQuad =  Synth(\infiniteHoldReverb_4chan, [\in, ~buses[\infiniteReverbQuad], \out, 0, \mix, 0.5, \feedback, 0.45], ~reverbGrp);
 
 
 		~reverb0PA = Synth(\reverb_st,[\in, ~buses[\reverb0PA], \out, 0, \mix, 0.025], ~reverbGrp);
@@ -452,8 +489,18 @@ s.waitForBoot({
 		var env = Env( [0,1,1,0], [atk,sus,rel], [1,0,-1] ).kr(2);
 		var framePos = sPos *  BufFrames.kr(buf);
 		var sig = PlayBuf.ar(1, buf, rate * BufRateScale.kr(buf), startPos:framePos);
+
+		//var localSlider = In.kr(~morphAmp);
+		//var masterSlider = In.kr(~masterAmp);
+		//var slidersAmp = localSlider * masterSlider;
+		//localSlider.poll(2, "localSlider");
+		//masterSlider.poll(2, "masterSlider");
+
+		//sig = sig * env * slidersAmp;
 		sig = sig * env;
 		sig = Pan2.ar(sig, pan, amp);
+
+
 		Out.ar(out, sig);
 	}).add;
 
@@ -483,6 +530,17 @@ s.waitForBoot({
 		arg in=20, amp=1, mix=0.05, freqF=4000, decay=2.5, delay=0.05, out=2;
 		var sig, wet, dry;
 		dry = In.ar(in, 3);
+		wet = dry;
+		wet = DelayN.ar(wet, delay, delay);
+		20.do{wet = AllpassN.ar(wet, 0.05,{Rand(0.001,0.05)}!2, decay); wet = LPF.ar(wet,freqF);};
+		sig = XFade2.ar(dry, wet, mix*2-1, amp);
+		Out.ar(out, sig);
+	}).add;
+
+	SynthDef(\reverb_4chan, {
+		arg in=20, amp=1, mix=0.05, freqF=4000, decay=2.5, delay=0.05, out=2;
+		var sig, wet, dry;
+		dry = In.ar(in, 4);
 		wet = dry;
 		wet = DelayN.ar(wet, delay, delay);
 		20.do{wet = AllpassN.ar(wet, 0.05,{Rand(0.001,0.05)}!2, decay); wet = LPF.ar(wet,freqF);};
@@ -543,6 +601,30 @@ s.waitForBoot({
 		var inAmp = Amplitude.kr(Mix.ar(dry));
 		var gatedSig = Mix.ar(dry) * (inAmp > gateThreshold);
 		var local = (LocalIn.ar(3) + gatedSig.dup(3));
+
+		//apply reverb
+		var sig = (0..14).inject(local, AllpassL.ar( _ ,0.06, Rand(0.01, 0.06), 3));
+
+		//complete feedback loop - send audio back to LoopIn
+		sig = LeakDC.ar(sig);
+		LocalOut.ar(sig.scramble * feedback);
+
+		//non-feedback output to speakers.
+		sig = Limiter.ar(sig);
+		sig = XFade2.ar(dry, sig, mix*2-1, amp).softclip;
+
+		// -1 to +1 is used to modulate the pan along circle.
+		Out.ar(out, sig);
+	}).add;
+
+
+	SynthDef(\infiniteHoldReverb_4chan, {
+		arg in, feedback = 0.3, gateThreshold = 0.03, amp=0.5, mix=1, out=2;
+		//input signal
+		var dry =  In.ar(in,4);
+		var inAmp = Amplitude.kr(Mix.ar(dry));
+		var gatedSig = Mix.ar(dry) * (inAmp > gateThreshold);
+		var local = (LocalIn.ar(4) + gatedSig.dup(4));
 
 		//apply reverb
 		var sig = (0..14).inject(local, AllpassL.ar( _ ,0.06, Rand(0.01, 0.06), 3));
@@ -687,6 +769,7 @@ s.waitForBoot({
 // ---  MORPH PLAYER ---
 //--------------------------------------------------------
 
+Pbindef(\morphFront,  \out, ~buses[\positionRissetFollowerFX]).play;
 Pbindef(\morphFront).play;
 Pbindef(\morphFront).stop;
 Pbindef(\morphFront, \sPos, Pdefn(\incrementally_0_to_1_millis_and_back).stutter(1));
@@ -721,6 +804,14 @@ Pbindef(\morphFront, \out, Pwrand( [~buses[\reverb0PA], ~buses[\reverb1PA], ~bus
 Pbindef(\morphFront, \out, Pwrand( [~buses[\reverb0PA], ~buses[\reverb1PA], ~buses[\stresonPA], ~buses[\infiniteReverbPA]], [0.10 ,0.2, 0.2, 0.05].normalizeSum, inf));
 Pbindef(\morphFront, \out, ~buses[\infiniteReverbPA]);
 Pbindef(\morphFront, \out, ~buses[\stresonPA]);
+Pbindef(\morphFront, \out, ~buses[\reverb1PA]);
+Pbindef(\morphFront, \out, ~buses[\rissetFX]);
+Pbindef(\morphFront, \out, ~buses[\positionRissetFollowerFX]);
+
+
+
+
+
 
 
 ~stresonPA.set(\delaytime, Pdefn(\incrementally_0_to_1_millis_and_back) + 0.00001)
@@ -889,6 +980,7 @@ Pbindef(\morphAzVib).stop
 ~callPreset.(5)
 ~callPreset.(6)
 ~callPreset.(7)
+~callPreset.(8)
 
 ~logActiveSounds.();
 
