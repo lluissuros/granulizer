@@ -28,7 +28,7 @@ The full `sounds` library is not stored in this repository.
 
 Shared copy:
 
-- [Granulizer audio assets](https://drive.google.com/drive/folders/1bT2xlZ5g7UYLJLoX5KxRRd9w5FTuReVw?usp=drive_link)
+- [Granulizer audio assets (final zip)](https://drive.google.com/drive/folders/1LT10bx8MctYDSmDzn-X5P1GVKgsPJps8?usp=drive_link)
 
 Local working copy used during recovery/import:
 
